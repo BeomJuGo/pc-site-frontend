@@ -18,15 +18,16 @@ const Detail = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const detail = await fetchPartDetail(category, id);
-      const history = await fetchPriceHistory(category, id);
-      setPart(detail);
-      setPriceHistory(history);
-      setLoading(false);
-    };
-    fetchData();
-  }, [category, id]);
+  const fetchData = async () => {
+    const detail = await fetchPartDetail(category, id);
+    console.log("📦 받아온 부품 정보:", detail); // ✅ 이 줄 추가
+    const history = await fetchPriceHistory(category, id);
+    setPart(detail);
+    setPriceHistory(history);
+    setLoading(false);
+  };
+  fetchData();
+}, [category, id]);
 
   if (loading)
     return <div className="text-center text-gray-500">⏳ 로딩 중...</div>;

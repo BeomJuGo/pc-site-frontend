@@ -1,4 +1,4 @@
-// ✅ 부품 리스트 (카테고리별 더미 데이터)
+// ✅ 부품 리스트 (더미)
 export const fetchParts = async (category) => {
   const data = {
     cpu: [
@@ -9,14 +9,13 @@ export const fetchParts = async (category) => {
       { id: 1, name: "NVIDIA RTX 4070" },
     ],
   };
-
   return data[category] || [];
 };
 
 // ✅ 네이버 가격 및 이미지 가져오기
 export const fetchNaverPrice = async (query) => {
   try {
-    const res = await fetch(`https://pc-site-backend.onrender.com/api/naver-price?query=${encodeURIComponent(query)}`);
+    const res = await fetch(`/api/naver-price?query=${encodeURIComponent(query)}`);
     const data = await res.json();
     const item = data.items?.[0];
     return {
@@ -29,10 +28,10 @@ export const fetchNaverPrice = async (query) => {
   }
 };
 
-// ✅ GPT 기반 한줄평 + 주요 사양 요약 가져오기
+// ✅ GPT 요약 정보
 export const fetchGptInfo = async (partName, category) => {
   try {
-    const res = await fetch("https://pc-site-backend.onrender.com/api/gpt-info", {
+    const res = await fetch("/api/gpt-info", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ partName, category }),
@@ -51,12 +50,10 @@ export const fetchGptInfo = async (partName, category) => {
   }
 };
 
-// ✅ CPU 벤치마크 점수 (Geekbench 기준)
+// ✅ CPU 벤치마크
 export const fetchCpuBenchmark = async (cpuName) => {
   try {
-    const res = await fetch(
-      `https://pc-site-backend.onrender.com/api/cpu-benchmark?cpu=${encodeURIComponent(cpuName)}`
-    );
+    const res = await fetch(`/api/cpu-benchmark?cpu=${encodeURIComponent(cpuName)}`);
     const data = await res.json();
     return data.benchmarkScore || { singleCore: "점수 없음", multiCore: "점수 없음" };
   } catch (err) {
@@ -70,7 +67,7 @@ export const fetchGpuBenchmark = async () => {
   return { singleCore: "지원 예정", multiCore: "지원 예정" };
 };
 
-// ✅ 부품 전체 데이터 통합 (카드용)
+// ✅ 부품 카드용 통합 데이터
 export const fetchFullPartData = async (category) => {
   const parts = await fetchParts(category);
 
@@ -78,7 +75,6 @@ export const fetchFullPartData = async (category) => {
     parts.map(async (part) => {
       const { price, image } = await fetchNaverPrice(part.name);
       const { review, specSummary } = await fetchGptInfo(part.name, category);
-
       const benchmarkScore =
         category === "cpu"
           ? await fetchCpuBenchmark(part.name)
@@ -89,13 +85,13 @@ export const fetchFullPartData = async (category) => {
   );
 };
 
-// ✅ 부품 상세 정보
+// ✅ 상세 정보
 export const fetchPartDetail = async (category, id) => {
   const data = await fetchFullPartData(category);
   return data.find((d) => d.id.toString() === id.toString());
 };
 
-// ✅ 가격 히스토리 (더미 데이터)
+// ✅ 가격 히스토리 (더미)
 export const fetchPriceHistory = async () => {
   return [
     { date: "2024-12", price: 560000 },

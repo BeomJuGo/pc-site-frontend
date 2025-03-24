@@ -6,17 +6,32 @@ const Category = () => {
   const [parts, setParts] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // ✅ 카테고리별 검색 키워드 맵
+  const keywordMap = {
+    cpu: "AMD 인텔 CPU",
+    gpu: "그래픽카드 GPU",
+    memory: "DDR5 메모리",
+    mainboard: "메인보드",
+    ssd: "SSD 저장장치",
+    hdd: "HDD 하드디스크",
+  };
+
   useEffect(() => {
     const fetchNaverParts = async () => {
       setLoading(true);
+      const query = keywordMap[category.toLowerCase()] || category;
+
       try {
-        const res = await fetch(`/api/naver-price?query=${encodeURIComponent(category)}&display=20&sort=asc`);
+        const res = await fetch(
+          `/api/naver-price?query=${encodeURIComponent(query)}&display=20&sort=asc`
+        );
         const data = await res.json();
         setParts(data.items || []);
       } catch (err) {
         console.error("❌ 네이버 검색 실패:", err);
         setParts([]);
       }
+
       setLoading(false);
     };
 

@@ -1,21 +1,17 @@
-// ✅ 부품 리스트 (더미)
-export const fetchParts = async (category) => {
-  const data = {
-    cpu: [
-      { id: 1, name: "Intel Core i5-14600K" },
-      { id: 2, name: "Intel Core i9-14900K" },
-    ],
-    gpu: [
-      { id: 1, name: "NVIDIA RTX 4070" },
-    ],
-  };
-  return data[category] || [];
+// ✅ 카테고리별 키워드 맵
+const keywordMap = {
+  cpu: "인텔 AMD CPU",
+  gpu: "그래픽카드 GPU",
+  memory: "DDR5 메모리",
+  mainboard: "메인보드",
+  ssd: "SSD 저장장치",
+  hdd: "HDD 하드디스크",
 };
 
 // ✅ 네이버 가격 및 이미지 가져오기
 export const fetchNaverPrice = async (query) => {
   try {
-    const res = await fetch(`/api/naver-price?query=${encodeURIComponent(query)}`);
+    const res = await fetch(`/api/naver-price?query=${encodeURIComponent(query)}&display=1`);
     const data = await res.json();
     const item = data.items?.[0];
     return {
@@ -67,25 +63,47 @@ export const fetchGpuBenchmark = async () => {
   return { singleCore: "지원 예정", multiCore: "지원 예정" };
 };
 
+// ✅ 카테고리별 실시간 부품 리스트
+export const fetchParts = async (category) => {
+  const keyword = keywordMap[category.toLowerCase()] || category;
+
+  try {
+    const res = await fetch(`/api/naver-price?query=${encodeURIComponent(keyword)}&display=10&sort=asc`);
+    const data = await res.json();
+
+    const parts = data.items?.map((item, index) => ({
+      id: index + 1,
+      name: item.title.replace(/<[^>]+>/g, ""), // HTML 태그 제거
+      image: item.image,
+      price: item.lprice,
+      link: item.link,
+    })) || [];
+
+    return parts;
+  } catch (err) {
+    console.error("❌ fetchParts 오류:", err);
+    return [];
+  }
+};
+
 // ✅ 부품 카드용 통합 데이터
 export const fetchFullPartData = async (category) => {
   const parts = await fetchParts(category);
 
   return await Promise.all(
     parts.map(async (part) => {
-      const { price, image } = await fetchNaverPrice(part.name);
       const { review, specSummary } = await fetchGptInfo(part.name, category);
       const benchmarkScore =
         category === "cpu"
           ? await fetchCpuBenchmark(part.name)
           : await fetchGpuBenchmark(part.name);
 
-      return { ...part, price, image, review, specSummary, benchmarkScore };
+      return { ...part, review, specSummary, benchmarkScore };
     })
   );
 };
 
-// ✅ 상세 정보
+// ✅ 상세 보기
 export const fetchPartDetail = async (category, id) => {
   const data = await fetchFullPartData(category);
   return data.find((d) => d.id.toString() === id.toString());

@@ -18,16 +18,20 @@ const Detail = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-  const fetchData = async () => {
-    const detail = await fetchPartDetail(category, id);
-    console.log("📦 받아온 부품 정보:", detail); // ✅ 이 줄 추가
-    const history = await fetchPriceHistory(category, id);
-    setPart(detail);
-    setPriceHistory(history);
-    setLoading(false);
-  };
-  fetchData();
-}, [category, id]);
+    const fetchData = async () => {
+      try {
+        const detail = await fetchPartDetail(category, id);
+        const history = await fetchPriceHistory(category, id);
+        setPart(detail);
+        setPriceHistory(history);
+      } catch (error) {
+        console.error("❌ 부품 상세 정보 불러오기 실패:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [category, id]);
 
   if (loading)
     return <div className="text-center text-gray-500">⏳ 로딩 중...</div>;
@@ -58,7 +62,7 @@ const Detail = () => {
               : `${Number(part.price).toLocaleString()}원`}
           </p>
 
-          {/* ✅ CPU 전용 벤치마크 점수 */}
+          {/* ✅ Geekbench 점수 */}
           {category === "cpu" && part.benchmarkScore && (
             <div className="mb-2">
               ⚙️ Geekbench 점수:

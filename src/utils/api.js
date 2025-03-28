@@ -16,7 +16,7 @@ export const fetchParts = async (category) => {
 // ✅ 네이버 가격 및 이미지 가져오기
 export const fetchNaverPrice = async (query) => {
   try {
-    const res = await fetch(`https://pc-site-backend.onrender.com/api/naver-price?query=${encodeURIComponent(query)}`);
+    const res = await fetch(`https://pc-site-backend-docker.onrender.com/api/naver-price?query=${encodeURIComponent(query)}`);
     const data = await res.json();
     const item = data.items?.[0];
     return {
@@ -32,7 +32,7 @@ export const fetchNaverPrice = async (query) => {
 // ✅ GPT 기반 한줄평 + 주요 사양 요약 가져오기
 export const fetchGptInfo = async (partName, category) => {
   try {
-    const res = await fetch("https://pc-site-backend.onrender.com/api/gpt-info", {
+    const res = await fetch("https://pc-site-backend-docker.onrender.com/api/gpt-info", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ partName, category }),
@@ -55,7 +55,7 @@ export const fetchGptInfo = async (partName, category) => {
 export const fetchCpuBenchmark = async (cpuName) => {
   try {
     const res = await fetch(
-      `https://pc-site-backend.onrender.com/api/cpu-benchmark?cpu=${encodeURIComponent(cpuName)}`
+      `https://pc-site-backend-docker.onrender.com/api/cpu-benchmark?cpu=${encodeURIComponent(cpuName)}`
     );
     const data = await res.json();
     return data.benchmarkScore || { singleCore: "점수 없음", multiCore: "점수 없음" };

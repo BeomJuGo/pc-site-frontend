@@ -19,16 +19,11 @@ const Detail = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const detail = await fetchPartDetail(category, id);
-        const history = await fetchPriceHistory(category, id);
-        setPart(detail);
-        setPriceHistory(history);
-      } catch (error) {
-        console.error("❌ 부품 상세 정보 불러오기 실패:", error);
-      } finally {
-        setLoading(false);
-      }
+      const detail = await fetchPartDetail(category, id);
+      const history = await fetchPriceHistory(category, id);
+      setPart(detail);
+      setPriceHistory(history);
+      setLoading(false);
     };
     fetchData();
   }, [category, id]);
@@ -62,7 +57,6 @@ const Detail = () => {
               : `${Number(part.price).toLocaleString()}원`}
           </p>
 
-          {/* ✅ Geekbench 점수 */}
           {category === "cpu" && part.benchmarkScore && (
             <div className="mb-2">
               ⚙️ Geekbench 점수:
@@ -73,39 +67,48 @@ const Detail = () => {
             </div>
           )}
 
-          {/* ✅ 주요 사양 요약 */}
+          {/* ✅ 주요 사양 출력 (GPT 요약 기반) */}
           {part.specSummary && (
             <div className="mb-2">
-              📝 주요 사양:{" "}
-              <span className="text-sm text-gray-700">{part.specSummary}</span>
+              📋 주요 사양 요약:
+              <p className="ml-4 text-sm text-gray-800 whitespace-pre-line">
+                {part.specSummary}
+              </p>
             </div>
           )}
 
-          {/* ✅ 한줄평 */}
+          {/* ✅ AI 한줄평 (장점/단점 형식 기대) */}
           {part.review && (
-            <div className="mb-2">
-              💬 한줄평:{" "}
-              <span className="text-sm text-gray-700">{part.review}</span>
-            </div>
+            <p className="italic text-blue-600 whitespace-pre-line mt-2">
+              💬 {part.review}
+            </p>
           )}
         </div>
       </div>
 
-      {/* ✅ 가격 변동 차트 */}
-      {priceHistory.length > 0 && (
-        <div className="mt-6">
-          <h3 className="text-lg font-semibold mb-2">📉 가격 변동 추이</h3>
+      <div className="mt-10">
+        <h3 className="text-xl font-semibold mb-2">📈 가격 변동 추이</h3>
+        {priceHistory.length > 0 ? (
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={priceHistory}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip />
-              <Line type="monotone" dataKey="price" stroke="#8884d8" />
+              <YAxis tickFormatter={(v) => `${v.toLocaleString()}원`} />
+              <Tooltip
+                formatter={(value) => `${Number(value).toLocaleString()}원`}
+              />
+              <Line
+                type="monotone"
+                dataKey="price"
+                stroke="#3b82f6"
+                strokeWidth={2}
+              />
             </LineChart>
           </ResponsiveContainer>
-        </div>
-      )}
+        ) : (
+          <p className="text-gray-500">가격 정보 없음</p>
+        )}
+      </div>
     </div>
   );
 };

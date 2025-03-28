@@ -96,11 +96,13 @@ export const fetchPartDetail = async (category, id) => {
 };
 
 // ✅ 가격 히스토리 (더미 데이터)
-export const fetchPriceHistory = async () => {
-  return [
-    { date: "2024-12", price: 560000 },
-    { date: "2025-01", price: 570000 },
-    { date: "2025-02", price: 545000 },
-    { date: "2025-03", price: 552000 },
-  ];
+export const fetchPriceHistory = async (partName) => {
+  try {
+    const res = await fetch(`https://pc-site-backend-docker.onrender.com/api/price-history?partName=${encodeURIComponent(partName)}`);
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.error("❌ fetchPriceHistory 오류:", err);
+    return [];
+  }
 };

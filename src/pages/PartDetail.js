@@ -17,16 +17,17 @@ const Detail = () => {
   const [priceHistory, setPriceHistory] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const detail = await fetchPartDetail(category, id);
-      const history = await fetchPriceHistory(category, id);
-      setPart(detail);
-      setPriceHistory(history);
-      setLoading(false);
-    };
-    fetchData();
-  }, [category, id]);
+useEffect(() => {
+  const fetchData = async () => {
+    const detail = await fetchPartDetail(category, id);
+    const history = await fetchPriceHistory(detail.name); // ← 여기 변경됨
+    setPart(detail);
+    setPriceHistory(history);
+    setLoading(false);
+  };
+  fetchData();
+}, [category, id]);
+
 
   if (loading)
     return <div className="text-center text-gray-500">⏳ 로딩 중...</div>;

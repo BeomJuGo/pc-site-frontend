@@ -11,8 +11,8 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/category/:category" element={<Category />} />
-        <Route path="/Partdetail/:category/:id" element={<Detail />} />
-        <Route path="/Recommend" element={<Recommend />} /> 
+        <Route path="/detail/:category/:id" element={<Detail />} /> {/* ✅ 수정된 라우팅 */}
+        <Route path="/Recommend" element={<Recommend />} />
       </Routes>
     </Router>
   );

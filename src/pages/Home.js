@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom"; // ✅ 추가
 
 const tabs = ["CPU", "GPU", "메모리", "메인보드"];
 
@@ -59,6 +60,7 @@ const allParts = {
 };
 
 function Home() {
+  const navigate = useNavigate(); // ✅ 추가
   const [selectedTab, setSelectedTab] = useState("CPU");
   const [sortOption, setSortOption] = useState("가성비순");
 
@@ -111,16 +113,28 @@ function Home() {
             <img
               src={part.image}
               alt={part.name}
-              className="w-24 h-24 object-cover rounded-lg mr-6 border"
+              className="w-24 h-24 object-cover rounded-lg mr-6 border cursor-pointer"
+              onClick={() => navigate(`/detail/${selectedTab}/${part.id}`)} // ✅ 클릭 시 이동
             />
             <div className="flex-1">
-              <h3 className="text-xl font-bold text-gray-800">{part.name}</h3>
+              <h3
+                className="text-xl font-bold text-gray-800 cursor-pointer"
+                onClick={() => navigate(`/detail/${selectedTab}/${part.id}`)} // ✅ 클릭 시 이동
+              >
+                {part.name}
+              </h3>
               <p className="text-gray-500">{part.description}</p>
             </div>
-            <div className="text-right">
+            <div className="text-right space-y-2">
               <p className="text-lg font-semibold text-blue-600">
                 {part.price.toLocaleString()}원
               </p>
+              <button
+                className="bg-blue-500 hover:bg-blue-600 text-white rounded-full px-4 py-2 text-sm"
+                onClick={() => alert('구매하기 기능은 아직 구현되지 않았습니다.')}
+              >
+                구매하기
+              </button>
             </div>
           </div>
         ))}

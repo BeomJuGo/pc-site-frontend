@@ -7,6 +7,8 @@ const Category = () => {
   const navigate = useNavigate();
   const [parts, setParts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sortBy, setSortBy] = useState("popularity");
+  const [sortOrder, setSortOrder] = useState("desc");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -15,9 +17,31 @@ const Category = () => {
       setParts(enrichedParts);
       setLoading(false);
     };
-
     fetchData();
   }, [category]);
+
+  const toggleSortOrder = () => {
+    setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+  };
+
+  const sortedParts = [...parts].sort((a, b) => {
+    let aValue, bValue;
+
+    if (sortBy === "popularity") {
+      aValue = a.review.length;
+      bValue = b.review.length;
+    } else if (sortBy === "price") {
+      aValue = Number(a.price) || 0;
+      bValue = Number(b.price) || 0;
+    } else if (sortBy === "value") {
+      const aScore = category === "cpu" ? Number(a.benchmarkScore.singleCore) || 1 : 1;
+      const bScore = category === "cpu" ? Number(b.benchmarkScore.singleCore) || 1 : 1;
+      aValue = aScore / (Number(a.price) || 1);
+      bValue = bScore / (Number(b.price) || 1);
+    }
+
+    return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
+  });
 
   if (loading) {
     return <div className="text-center p-4 text-gray-500">⏳ 불러오는 중...</div>;
@@ -27,8 +51,36 @@ const Category = () => {
     <div className="p-4 sm:p-8">
       <h2 className="text-3xl font-bold mb-6">{category.toUpperCase()} 목록</h2>
 
+      {/* 정렬 버튼 */}
+      <div className="flex flex-wrap items-center gap-3 mb-6">
+        <button
+          onClick={() => setSortBy("popularity")}
+          className={`px-4 py-2 rounded ${sortBy === "popularity" ? "bg-blue-500 text-white" : "bg-gray-200"}`}
+        >
+          인기순
+        </button>
+        <button
+          onClick={() => setSortBy("price")}
+          className={`px-4 py-2 rounded ${sortBy === "price" ? "bg-blue-500 text-white" : "bg-gray-200"}`}
+        >
+          가격순
+        </button>
+        <button
+          onClick={() => setSortBy("value")}
+          className={`px-4 py-2 rounded ${sortBy === "value" ? "bg-blue-500 text-white" : "bg-gray-200"}`}
+        >
+          가성비순
+        </button>
+        <button
+          onClick={toggleSortOrder}
+          className="px-4 py-2 rounded bg-gray-300"
+        >
+          {sortOrder === "asc" ? "⬆️ 오름차순" : "⬇️ 내림차순"}
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {parts.map((part) => (
+        {sortedParts.map((part) => (
           <div
             key={part.id}
             onClick={() => navigate(`/detail/${category}/${part.id}`)}
@@ -37,7 +89,11 @@ const Category = () => {
             <div className="flex justify-between items-start mb-3">
               <h3 className="text-xl font-semibold">{part.name}</h3>
               {part.image && (
-                <img src={part.image} alt={part.name} className="w-20 h-20 object-contain rounded border" />
+                <img
+                  src={part.image}
+                  alt={part.name}
+                  className="w-20 h-20 object-contain rounded border"
+                />
               )}
             </div>
 

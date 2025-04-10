@@ -1,26 +1,21 @@
+// ✅ App.js - 라우팅 구성 파일
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Category from "./pages/Category";
 import Detail from "./pages/PartDetail";
 import Recommend from "./pages/Recommend";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import Header from "./components/Header";
 
-const AppRouter = () => {
+const App = () => {
   return (
     <Router>
-      <Header />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/category/:category" element={<Category />} />
-        <Route path="/detail/:category/:id" element={<Detail />} />
-        <Route path="/ai-recommend" element={<Recommend />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
+        <Route path="/detail/:category/:id" element={<Detail />} /> {/* ✅ 수정된 라우팅 */}
+        <Route path="/Recommend" element={<Recommend />} />
       </Routes>
     </Router>
   );
 };
 
-export default AppRouter;
+export default App;

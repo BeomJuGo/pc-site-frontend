@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { fetchNaverPrice } from "../utils/api"; // ✅ api.js에 이미 있는 함수 사용
+import { fetchNaverPrice } from "../utils/api"; // 기존 사용
 
 const Recommend = () => {
   const [budget, setBudget] = useState("");
@@ -32,12 +32,21 @@ const Recommend = () => {
 
       const results = await Promise.all(
         keywordList.map(async (keyword) => {
-          const data = await fetchNaverPrice(keyword);
-          return {
-            name: keyword,
-            price: Number(data.price) || 0,
-            image: data.image || "",
-          };
+          try {
+            const data = await fetchNaverPrice(keyword);
+            return {
+              name: keyword,
+              price: Number(data?.price) || 0,
+              image: data?.image || "",
+            };
+          } catch (err) {
+            console.error(`❌ ${keyword} 가져오기 실패`, err);
+            return {
+              name: keyword,
+              price: 0,
+              image: "",
+            };
+          }
         })
       );
 
@@ -45,7 +54,7 @@ const Recommend = () => {
       setOverBudget(total > Number(budget));
       setRecommendedParts(results);
     } catch (err) {
-      console.error("추천 오류:", err);
+      console.error("전체 추천 실패:", err);
     } finally {
       setLoading(false);
     }
@@ -88,34 +97,42 @@ const Recommend = () => {
         )}
 
         {/* 추천 결과 */}
-        {recommendedParts.length > 0 && !loading && (
-          <div className="mt-10">
-            <h3 className="text-2xl font-bold mb-6 text-center">🎯 추천 결과</h3>
+        <div className="mt-10">
+          <h3 className="text-2xl font-bold mb-6 text-center">🎯 추천 결과</h3>
+          {recommendedParts.length === 0 ? (
+            <div className="text-center text-gray-400">추천된 부품이 없습니다.</div>
+          ) : (
             <div className="grid grid-cols-1 gap-6">
               {recommendedParts.map((part, index) => (
                 <div key={index} className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
-                  {part.image && (
+                  {part.image ? (
                     <img src={part.image} alt={part.name} className="w-32 h-32 object-contain mx-auto mb-4" />
+                  ) : (
+                    <div className="w-32 h-32 bg-gray-100 flex items-center justify-center text-gray-400 mx-auto mb-4">
+                      No Image
+                    </div>
                   )}
                   <h4 className="text-xl font-semibold mb-2 text-center">{part.name}</h4>
                   <p className="text-center text-gray-700">💰 가격: {part.price.toLocaleString()}원</p>
                 </div>
               ))}
             </div>
+          )}
 
-            {/* 총 합계 */}
+          {/* 총 합계 */}
+          {recommendedParts.length > 0 && (
             <div className="text-right mt-6 text-lg font-semibold text-gray-800">
               총 예상 가격: {totalBudget.toLocaleString()}원
             </div>
+          )}
 
-            {/* 예산 초과 경고 */}
-            {overBudget && (
-              <div className="text-center text-red-500 font-semibold mt-4">
-                ⚠️ 예산을 초과했습니다! 부품 구성을 조정해 주세요.
-              </div>
-            )}
-          </div>
-        )}
+          {/* 예산 초과 경고 */}
+          {overBudget && (
+            <div className="text-center text-red-500 font-semibold mt-4">
+              ⚠️ 예산을 초과했습니다! 부품 구성을 조정해 주세요.
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

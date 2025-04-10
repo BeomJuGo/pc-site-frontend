@@ -73,9 +73,9 @@ const Category = () => {
         </button>
         <button
           onClick={toggleSortOrder}
-          className="px-4 py-2 rounded bg-gray-300"
+          className="px-3 py-2 rounded bg-gray-300 text-lg"
         >
-          {sortOrder === "asc" ? "⬆️ 오름차순" : "⬇️ 내림차순"}
+          {sortOrder === "asc" ? "🔼" : "🔽"}
         </button>
       </div>
 

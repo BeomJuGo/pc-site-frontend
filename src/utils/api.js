@@ -11,11 +11,10 @@ export const fetchParts = async (category) => {
       { id: 3, name: "NVIDIA RTX 4060 Ti" },
     ],
   };
-
   return data[category] || [];
 };
 
-// ✅ 네이버 가격 및 이미지 가져오기
+// ✅ 네이버 가격 및 이미지 가져오기 (API 실패 대비)
 export const fetchNaverPrice = async (query) => {
   try {
     const res = await fetch(`https://pc-site-backend-docker.onrender.com/api/naver-price?query=${encodeURIComponent(query)}`);
@@ -23,15 +22,15 @@ export const fetchNaverPrice = async (query) => {
     const item = data.items?.[0];
     return {
       price: item?.lprice || "가격 정보 없음",
-      image: item?.image || "",
+      image: item?.image || "https://via.placeholder.com/150", // 더미 이미지
     };
   } catch (err) {
     console.error("❌ fetchNaverPrice 오류:", err);
-    return { price: "가격 정보 오류", image: "" };
+    return { price: "가격 정보 없음", image: "https://via.placeholder.com/150" };
   }
 };
 
-// ✅ GPT 기반 한줄평 + 주요 사양 요약 가져오기
+// ✅ GPT 기반 한줄평 + 주요 사양 요약 가져오기 (API 실패 대비)
 export const fetchGptInfo = async (partName, category) => {
   try {
     const res = await fetch("https://pc-site-backend-docker.onrender.com/api/gpt-info", {
@@ -47,8 +46,8 @@ export const fetchGptInfo = async (partName, category) => {
   } catch (err) {
     console.error("❌ fetchGptInfo 오류:", err);
     return {
-      review: "AI 한줄평 오류",
-      specSummary: "사양 요약 오류",
+      review: "한줄평 없음",
+      specSummary: "사양 없음",
     };
   }
 };
@@ -67,10 +66,10 @@ export const fetchCpuBenchmark = async (cpuName) => {
   }
 };
 
-// ✅ GPU 벤치마크 점수 (더미 점수 추가)
+// ✅ GPU 벤치마크 점수 (더미 점수)
 export const fetchGpuBenchmark = async () => {
   return {
-    score: Math.floor(Math.random() * 10000) + 5000, // 5000~15000 사이 랜덤 점수
+    score: Math.floor(Math.random() * 10000) + 5000, // 5000~15000 랜덤 점수
   };
 };
 
@@ -82,7 +81,6 @@ export const fetchFullPartData = async (category) => {
     parts.map(async (part) => {
       const { price, image } = await fetchNaverPrice(part.name);
       const { review, specSummary } = await fetchGptInfo(part.name, category);
-
       const benchmarkScore =
         category === "cpu"
           ? await fetchCpuBenchmark(part.name)

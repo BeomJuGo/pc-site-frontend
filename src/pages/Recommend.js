@@ -1,138 +1,82 @@
 import { useState } from "react";
-import { fetchNaverPrice } from "../utils/api"; // 기존 사용
 
 const Recommend = () => {
   const [budget, setBudget] = useState("");
   const [purpose, setPurpose] = useState("");
   const [recommendedParts, setRecommendedParts] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [overBudget, setOverBudget] = useState(false);
+  const [error, setError] = useState("");
 
-  const keywordsMap = {
-    게이밍: ["게이밍 CPU", "게이밍 GPU", "게이밍 메모리"],
-    코딩: ["사무용 CPU", "사무용 메모리"],
-    방송: ["방송용 CPU", "방송용 GPU", "스트리밍 메모리"],
-    음악: ["음악작업 CPU", "음악작업 메모리"],
-  };
-
-  const handleRecommend = async () => {
+  const handleRecommend = () => {
     if (!budget || !purpose) {
-      alert("예산과 목적을 모두 입력해 주세요!");
+      setError("예산과 목적을 모두 입력하세요!");
       return;
     }
 
-    setLoading(true);
-    setRecommendedParts([]);
+    setError("");
 
-    try {
-      const lowerPurpose = purpose.toLowerCase();
-      const keywordList = Object.keys(keywordsMap).find(key =>
-        lowerPurpose.includes(key)
-      ) ? keywordsMap[Object.keys(keywordsMap).find(key => lowerPurpose.includes(key))] : ["가성비 CPU", "가성비 GPU"];
+    // 더미 추천 데이터 (진짜 API는 나중에 연결)
+    const dummyParts = [
+      { category: "CPU", name: "Intel Core i5-14600K", price: 350000 },
+      { category: "GPU", name: "NVIDIA RTX 4070", price: 750000 },
+      { category: "메모리", name: "Corsair 16GB", price: 80000 },
+    ];
 
-      const results = await Promise.all(
-        keywordList.map(async (keyword) => {
-          try {
-            const data = await fetchNaverPrice(keyword);
-            return {
-              name: keyword,
-              price: Number(data?.price) || 0,
-              image: data?.image || "",
-            };
-          } catch (err) {
-            console.error(`❌ ${keyword} 가져오기 실패`, err);
-            return {
-              name: keyword,
-              price: 0,
-              image: "",
-            };
-          }
-        })
-      );
-
-      const total = results.reduce((sum, part) => sum + part.price, 0);
-      setOverBudget(total > Number(budget));
-      setRecommendedParts(results);
-    } catch (err) {
-      console.error("전체 추천 실패:", err);
-    } finally {
-      setLoading(false);
-    }
+    setRecommendedParts(dummyParts);
   };
 
-  const totalBudget = recommendedParts.reduce((sum, part) => sum + part.price, 0);
+  const totalPrice = recommendedParts.reduce((sum, part) => sum + part.price, 0);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-3xl mx-auto">
-        <h2 className="text-3xl font-bold text-center mb-10">🧠 AI 맞춤 부품 추천</h2>
+    <div className="min-h-screen bg-gray-100 p-8">
+      <div className="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow">
+        <h1 className="text-3xl font-bold text-center mb-8">🧠 AI 맞춤 부품 추천</h1>
 
-        {/* 입력 폼 */}
-        <div className="flex flex-col items-center gap-6 mb-10">
+        {/* 입력폼 */}
+        <div className="flex flex-col gap-4 mb-8">
           <input
             type="number"
             placeholder="예산을 입력하세요 (예: 1200000)"
             value={budget}
             onChange={(e) => setBudget(e.target.value)}
-            className="w-72 border p-3 rounded-lg text-center placeholder-gray-400"
+            className="border p-3 rounded-lg"
           />
           <input
             type="text"
-            placeholder="목적을 입력하세요 (예: 게이밍, 코딩, 방송용, 음악작업 등)"
+            placeholder="목적을 입력하세요 (예: 게이밍, 코딩, 방송용 등)"
             value={purpose}
             onChange={(e) => setPurpose(e.target.value)}
-            className="w-72 border p-3 rounded-lg text-center placeholder-gray-400"
+            className="border p-3 rounded-lg"
           />
           <button
             onClick={handleRecommend}
-            className="w-72 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition"
+            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold p-3 rounded-lg"
           >
             추천 받기
           </button>
         </div>
 
-        {/* 로딩 상태 */}
-        {loading && (
-          <div className="text-center text-gray-500">⏳ 추천 제품을 찾는 중...</div>
-        )}
+        {/* 에러 메시지 */}
+        {error && <div className="text-red-500 text-center mb-4">{error}</div>}
 
         {/* 추천 결과 */}
-        <div className="mt-10">
-          <h3 className="text-2xl font-bold mb-6 text-center">🎯 추천 결과</h3>
-          {recommendedParts.length === 0 ? (
-            <div className="text-center text-gray-400">추천된 부품이 없습니다.</div>
-          ) : (
-            <div className="grid grid-cols-1 gap-6">
+        {recommendedParts.length > 0 && (
+          <div className="mt-6">
+            <h2 className="text-2xl font-semibold mb-4">🎯 추천 결과</h2>
+            <div className="flex flex-col gap-4">
               {recommendedParts.map((part, index) => (
-                <div key={index} className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
-                  {part.image ? (
-                    <img src={part.image} alt={part.name} className="w-32 h-32 object-contain mx-auto mb-4" />
-                  ) : (
-                    <div className="w-32 h-32 bg-gray-100 flex items-center justify-center text-gray-400 mx-auto mb-4">
-                      No Image
-                    </div>
-                  )}
-                  <h4 className="text-xl font-semibold mb-2 text-center">{part.name}</h4>
-                  <p className="text-center text-gray-700">💰 가격: {part.price.toLocaleString()}원</p>
+                <div key={index} className="border rounded-lg p-4 shadow">
+                  <div className="text-lg font-bold">{part.category}: {part.name}</div>
+                  <div className="text-gray-700">💰 가격: {part.price.toLocaleString()}원</div>
                 </div>
               ))}
             </div>
-          )}
 
-          {/* 총 합계 */}
-          {recommendedParts.length > 0 && (
-            <div className="text-right mt-6 text-lg font-semibold text-gray-800">
-              총 예상 가격: {totalBudget.toLocaleString()}원
+            {/* 총 가격 */}
+            <div className="text-right font-semibold text-gray-800 mt-6">
+              총 합계: {totalPrice.toLocaleString()}원
             </div>
-          )}
-
-          {/* 예산 초과 경고 */}
-          {overBudget && (
-            <div className="text-center text-red-500 font-semibold mt-4">
-              ⚠️ 예산을 초과했습니다! 부품 구성을 조정해 주세요.
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

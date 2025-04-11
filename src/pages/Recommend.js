@@ -38,19 +38,19 @@ const Recommend = () => {
             placeholder="예산을 입력하세요 (예: 1200000)"
             value={budget}
             onChange={(e) => setBudget(e.target.value)}
-            className="w-72 border p-3 rounded-lg text-center placeholder-gray-400"
-            step="100000" // 🔥 여기 핵심! 10만 원 단위로 증가
+            className="w-full border p-3 rounded-lg text-center placeholder-gray-400"
+            step="100000" // 🔥 10만 원 단위로 올라감
           />
           <input
             type="text"
             placeholder="목적을 입력하세요 (예: 게이밍, 코딩, 방송용 등)"
             value={purpose}
             onChange={(e) => setPurpose(e.target.value)}
-            className="w-72 border p-3 rounded-lg text-center placeholder-gray-400"
+            className="w-full border p-3 rounded-lg text-center placeholder-gray-400"
           />
           <button
             onClick={handleRecommend}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold p-3 rounded-lg"
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold p-3 rounded-lg"
           >
             추천 받기
           </button>

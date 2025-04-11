@@ -14,7 +14,7 @@ const Recommend = () => {
 
     setError("");
 
-    // 더미 추천 데이터 (나중에 네이버 쇼핑 API 연결 가능)
+    // 더미 추천 데이터 (GPU 포함, null 안전)
     const dummyParts = [
       { category: "CPU", name: "Intel Core i5-14600K", price: 350000 },
       { category: "GPU", name: "NVIDIA RTX 4070", price: 750000 },
@@ -24,7 +24,7 @@ const Recommend = () => {
     setRecommendedParts(dummyParts);
   };
 
-  const totalPrice = recommendedParts.reduce((sum, part) => sum + part.price, 0);
+  const totalPrice = recommendedParts.reduce((sum, part) => sum + (part?.price || 0), 0);
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
@@ -39,7 +39,7 @@ const Recommend = () => {
             value={budget}
             onChange={(e) => setBudget(e.target.value)}
             className="w-full border p-3 rounded-lg text-center placeholder-gray-400"
-            step="100000" // 🔥 10만 원 단위로 올라감
+            step="100000"
           />
           <input
             type="text"
@@ -66,8 +66,12 @@ const Recommend = () => {
             <div className="flex flex-col gap-4">
               {recommendedParts.map((part, index) => (
                 <div key={index} className="border rounded-lg p-4 shadow">
-                  <div className="text-lg font-bold">{part.category}: {part.name}</div>
-                  <div className="text-gray-700">💰 가격: {part.price.toLocaleString()}원</div>
+                  <div className="text-lg font-bold">
+                    {part?.category || "Unknown"}: {part?.name || "Unknown Part"}
+                  </div>
+                  <div className="text-gray-700">
+                    💰 가격: {part?.price ? `${part.price.toLocaleString()}원` : "가격 정보 없음"}
+                  </div>
                 </div>
               ))}
             </div>

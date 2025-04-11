@@ -7,6 +7,8 @@ export const fetchParts = async (category) => {
     ],
     gpu: [
       { id: 1, name: "NVIDIA RTX 4070" },
+      { id: 2, name: "AMD RX 7900XT" },
+      { id: 3, name: "NVIDIA RTX 4060 Ti" },
     ],
   };
 
@@ -51,7 +53,7 @@ export const fetchGptInfo = async (partName, category) => {
   }
 };
 
-// ✅ CPU 벤치마크 점수 (Geekbench 기준)
+// ✅ CPU 벤치마크 점수
 export const fetchCpuBenchmark = async (cpuName) => {
   try {
     const res = await fetch(
@@ -65,9 +67,11 @@ export const fetchCpuBenchmark = async (cpuName) => {
   }
 };
 
-// ✅ GPU 벤치마크 (지원 예정)
+// ✅ GPU 벤치마크 점수 (더미 점수 추가)
 export const fetchGpuBenchmark = async () => {
-  return { singleCore: "지원 예정", multiCore: "지원 예정" };
+  return {
+    score: Math.floor(Math.random() * 10000) + 5000, // 5000~15000 사이 랜덤 점수
+  };
 };
 
 // ✅ 부품 전체 데이터 통합 (카드용)
@@ -82,7 +86,7 @@ export const fetchFullPartData = async (category) => {
       const benchmarkScore =
         category === "cpu"
           ? await fetchCpuBenchmark(part.name)
-          : await fetchGpuBenchmark(part.name);
+          : await fetchGpuBenchmark();
 
       return { ...part, price, image, review, specSummary, benchmarkScore };
     })

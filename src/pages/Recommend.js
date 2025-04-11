@@ -14,7 +14,7 @@ const Recommend = () => {
 
     setError("");
 
-    // 더미 추천 데이터 (진짜 API는 나중에 연결)
+    // 더미 추천 데이터 (나중에 네이버 쇼핑 API 연결 가능)
     const dummyParts = [
       { category: "CPU", name: "Intel Core i5-14600K", price: 350000 },
       { category: "GPU", name: "NVIDIA RTX 4070", price: 750000 },
@@ -38,14 +38,15 @@ const Recommend = () => {
             placeholder="예산을 입력하세요 (예: 1200000)"
             value={budget}
             onChange={(e) => setBudget(e.target.value)}
-            className="border p-3 rounded-lg"
+            className="w-72 border p-3 rounded-lg text-center placeholder-gray-400"
+            step="100000" // 🔥 여기 핵심! 10만 원 단위로 증가
           />
           <input
             type="text"
             placeholder="목적을 입력하세요 (예: 게이밍, 코딩, 방송용 등)"
             value={purpose}
             onChange={(e) => setPurpose(e.target.value)}
-            className="border p-3 rounded-lg"
+            className="w-72 border p-3 rounded-lg text-center placeholder-gray-400"
           />
           <button
             onClick={handleRecommend}

@@ -12,7 +12,7 @@ const App = () => {
         <Route path="/" element={<Home />} />
         <Route path="/category/:category" element={<Category />} />
         <Route path="/detail/:category/:id" element={<Detail />} /> {/* ✅ 수정된 라우팅 */}
-        <Route path="/Recommend" element={<Recommend />} />
+        <Route path="/ai-recommend" element={<Recommend />} />
       </Routes>
     </Router>
   );

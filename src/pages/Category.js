@@ -11,14 +11,19 @@ const Category = () => {
   const [sortOrder, setSortOrder] = useState("desc");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const partsPerPage = 10; // 한 페이지당 10개
+  const partsPerPage = 10;
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const enrichedParts = await fetchFullPartData(category);
-      setParts(enrichedParts || []); // null/undefined 방지
-      setCurrentPage(1); // 카테고리 바뀔 때 첫 페이지로
+      try {
+        const enrichedParts = await fetchFullPartData(category);
+        setParts(enrichedParts || []);
+      } catch (err) {
+        console.error("❌ 부품 데이터 로딩 실패:", err);
+        setParts([]);
+      }
+      setCurrentPage(1);
       setLoading(false);
     };
     fetchData();
@@ -32,14 +37,14 @@ const Category = () => {
     let aValue, bValue;
 
     if (sortBy === "popularity") {
-      aValue = a.review.length;
-      bValue = b.review.length;
+      aValue = a.review?.length || 0;
+      bValue = b.review?.length || 0;
     } else if (sortBy === "price") {
       aValue = Number(a.price) || 0;
       bValue = Number(b.price) || 0;
     } else if (sortBy === "value") {
-      const aScore = category === "cpu" ? Number(a.benchmarkScore.singleCore) || 1 : 1;
-      const bScore = category === "cpu" ? Number(b.benchmarkScore.singleCore) || 1 : 1;
+      const aScore = category === "cpu" ? Number(a.benchmarkScore?.singleCore) || 1 : Number(a.benchmarkScore?.score) || 1;
+      const bScore = category === "cpu" ? Number(b.benchmarkScore?.singleCore) || 1 : Number(b.benchmarkScore?.score) || 1;
       aValue = aScore / (Number(a.price) || 1);
       bValue = bScore / (Number(b.price) || 1);
     }
@@ -119,15 +124,17 @@ const Category = () => {
                 <div className="text-gray-700 mb-1">
                   ⚙️ Geekbench 점수:
                   <ul className="ml-4 list-disc">
-                    <li>싱글 코어: {part.benchmarkScore?.singleCore || "N/A"}</li>
-                    <li>멀티 코어: {part.benchmarkScore?.multiCore || "N/A"}</li>
+                    <li>싱글 코어: {part.benchmarkScore?.singleCore || "점수 없음"}</li>
+                    <li>멀티 코어: {part.benchmarkScore?.multiCore || "점수 없음"}</li>
                   </ul>
                 </div>
               ) : (
-                <p className="text-gray-700 mb-1">⚙️ 벤치마크 점수: {part.benchmarkScore || "정보 없음"}</p>
+                <p className="text-gray-700 mb-1">
+                  ⚙️ 벤치마크 점수: {part.benchmarkScore?.score || "점수 없음"}
+                </p>
               )}
 
-              <p className="text-blue-600 italic mt-2">💬 {part.review}</p>
+              <p className="text-blue-600 italic mt-2">💬 {part.review || "한줄평 없음"}</p>
             </div>
           ))
         )}

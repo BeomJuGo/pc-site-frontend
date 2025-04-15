@@ -81,10 +81,11 @@ export const fetchFullPartData = async (category) => {
 
   return await Promise.all(
     parts.map(async (part) => {
-      const { price, image } = await fetchNaverPrice(part.name);
-      const { review, specSummary } = await fetchGptInfo(part.name, category);
+      const [{ price, image }, { review, specSummary }] = await Promise.all([
+        fetchNaverPrice(part.name),
+        fetchGptInfo(part.name, category),
+      ]);
 
-      // ✅ benchmarkScore는 fetchParts에서 가져온 값 사용
       const benchmarkScore = part.benchmarkScore || {
         singleCore: "-",
         multiCore: "-",

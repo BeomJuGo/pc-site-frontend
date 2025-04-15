@@ -32,26 +32,6 @@ export const fetchNaverPrice = async (query) => {
   }
 };
 
-// ✅ GPT 요약 + 한줄평 가져오기
-export const fetchGptInfo = async (partName, category) => {
-  try {
-    const clean = cleanName(partName);
-    const res = await fetch(`${BASE_URL}/api/gpt-info`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ partName: clean, category }),
-    });
-    const data = await res.json();
-    return {
-      review: data.review || "한줄평 없음",
-      specSummary: data.specSummary || "사양 없음",
-    };
-  } catch (err) {
-    console.error("❌ fetchGptInfo 오류:", err);
-    return { review: "AI 한줄평 오류", specSummary: "사양 요약 오류" };
-  }
-};
-
 // ✅ 부품 상세 정보 (정제된 이름 기준)
 export const fetchPartDetail = async (category, name) => {
   try {
@@ -83,18 +63,19 @@ export const fetchFullPartData = async (category) => {
   return await Promise.all(
     parts.map(async (part) => {
       const clean = cleanName(part.name);
+      const { price, image } = await fetchNaverPrice(clean);
 
-      const [{ price, image }, { review, specSummary }] = await Promise.all([
-        fetchNaverPrice(clean),
-        fetchGptInfo(clean, category),
-      ]);
-
-      const benchmarkScore = part.benchmarkScore || {
-        singleCore: "-",
-        multiCore: "-",
+      return {
+        ...part,
+        price,
+        image,
+        review: part.review || "한줄평 없음",
+        specSummary: part.specSummary || "사양 없음",
+        benchmarkScore: part.benchmarkScore || {
+          singleCore: "-",
+          multiCore: "-",
+        },
       };
-
-      return { ...part, price, image, review, specSummary, benchmarkScore };
     })
   );
 };

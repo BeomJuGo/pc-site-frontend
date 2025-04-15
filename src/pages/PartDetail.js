@@ -1,7 +1,12 @@
-// ✅ src/pages/PartDetail.js
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { fetchPartDetail } from "../utils/api";
+import {
+  fetchPartDetail,
+  fetchNaverPrice,
+  fetchGptInfo,
+  fetchCpuBenchmark,
+  fetchPriceHistory,
+} from "../utils/api";
 import {
   LineChart,
   Line,
@@ -19,22 +24,45 @@ const Detail = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const detail = await fetchPartDetail(category, decodeURIComponent(id));
-      setPart(detail);
+      const basePart = await fetchPartDetail(category, decodeURIComponent(id));
+      if (!basePart) {
+        setLoading(false);
+        return;
+      }
+
+      const [naver, gpt, benchmark, priceHistory] = await Promise.all([
+        fetchNaverPrice(basePart.name),
+        fetchGptInfo(basePart.name, category),
+        fetchCpuBenchmark(basePart.name),
+        fetchPriceHistory(basePart.name),
+      ]);
+
+      setPart({
+        ...basePart,
+        image: naver.image,
+        price: naver.price,
+        review: gpt.review,
+        specSummary: gpt.specSummary,
+        benchmarkScore: benchmark,
+        priceHistory,
+      });
       setLoading(false);
     };
+
     fetchData();
   }, [category, id]);
 
-  if (loading)
+  if (loading) {
     return <div className="text-center text-gray-500">⏳ 로딩 중...</div>;
+  }
 
-  if (!part)
+  if (!part) {
     return (
       <div className="text-center text-red-500">
         ❌ 부품 정보를 불러올 수 없습니다.
       </div>
     );
+  }
 
   return (
     <div className="max-w-3xl mx-auto p-4">
@@ -51,7 +79,10 @@ const Detail = () => {
 
         <div className="flex-1">
           <p className="mb-2">
-            💰 가격: {isNaN(Number(part.price)) ? part.price : `${Number(part.price).toLocaleString()}원`}
+            💰 가격:{" "}
+            {isNaN(Number(part.price))
+              ? part.price
+              : `${Number(part.price).toLocaleString()}원`}
           </p>
 
           {part.benchmarkScore && (

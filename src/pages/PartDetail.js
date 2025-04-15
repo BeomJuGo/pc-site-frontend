@@ -1,12 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import {
-  fetchPartDetail,
-  fetchNaverPrice,
-  fetchGptInfo,
-  fetchCpuBenchmark,
-  fetchPriceHistory,
-} from "../utils/api";
+import { fetchPartDetail, fetchPriceHistory } from "../utils/api";
 import {
   LineChart,
   Line,
@@ -20,49 +14,29 @@ import {
 const Detail = () => {
   const { category, id } = useParams();
   const [part, setPart] = useState(null);
+  const [priceHistory, setPriceHistory] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
-      const basePart = await fetchPartDetail(category, decodeURIComponent(id));
-      if (!basePart) {
-        setLoading(false);
-        return;
-      }
-
-      const [naver, gpt, benchmark, priceHistory] = await Promise.all([
-        fetchNaverPrice(basePart.name),
-        fetchGptInfo(basePart.name, category),
-        fetchCpuBenchmark(basePart.name),
-        fetchPriceHistory(basePart.name),
-      ]);
-
-      setPart({
-        ...basePart,
-        image: naver.image,
-        price: naver.price,
-        review: gpt.review,
-        specSummary: gpt.specSummary,
-        benchmarkScore: benchmark,
-        priceHistory,
-      });
+      const detail = await fetchPartDetail(category, decodeURIComponent(id));
+      const history = await fetchPriceHistory(decodeURIComponent(id));
+      setPart(detail);
+      setPriceHistory(history);
       setLoading(false);
     };
-
     fetchData();
   }, [category, id]);
 
-  if (loading) {
+  if (loading)
     return <div className="text-center text-gray-500">⏳ 로딩 중...</div>;
-  }
 
-  if (!part) {
+  if (!part)
     return (
       <div className="text-center text-red-500">
         ❌ 부품 정보를 불러올 수 없습니다.
       </div>
     );
-  }
 
   return (
     <div className="max-w-3xl mx-auto p-4">
@@ -79,10 +53,8 @@ const Detail = () => {
 
         <div className="flex-1">
           <p className="mb-2">
-            💰 가격:{" "}
-            {isNaN(Number(part.price))
-              ? part.price
-              : `${Number(part.price).toLocaleString()}원`}
+            💰 현재 가격:{" "}
+            {isNaN(Number(part.price)) ? part.price : `${Number(part.price).toLocaleString()}원`}
           </p>
 
           {part.benchmarkScore && (
@@ -114,14 +86,19 @@ const Detail = () => {
 
       <div className="mt-10">
         <h3 className="text-xl font-semibold mb-2">📈 가격 변동 추이</h3>
-        {part.priceHistory?.length > 0 ? (
+        {priceHistory?.length > 0 ? (
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={part.priceHistory}>
+            <LineChart data={priceHistory}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
               <YAxis tickFormatter={(v) => `${v.toLocaleString()}원`} />
               <Tooltip formatter={(value) => `${Number(value).toLocaleString()}원`} />
-              <Line type="monotone" dataKey="price" stroke="#3b82f6" strokeWidth={2} />
+              <Line
+                type="monotone"
+                dataKey="price"
+                stroke="#3b82f6"
+                strokeWidth={2}
+              />
             </LineChart>
           </ResponsiveContainer>
         ) : (

@@ -2,7 +2,7 @@
 
 const BASE_URL = "https://pc-site-backend.onrender.com"; // 너의 백엔드 주소
 
-// ✅ CPU 목록 자동 불러오기 (이전의 하드코딩 제거)
+// ✅ CPU 목록 자동 불러오기
 export const fetchParts = async (category) => {
   try {
     const res = await fetch(`${BASE_URL}/api/parts/${category}`);
@@ -61,18 +61,26 @@ export const fetchCpuBenchmark = async (cpuName) => {
   }
 };
 
-// ✅ 상세 부품 정보
-export const fetchPartDetail = async (category, id) => {
-  const data = await fetchParts(category);
-  return data.find((d) => d.id.toString() === id.toString());
+// ✅ 부품 상세 정보 (이름 기반)
+export const fetchPartDetail = async (category, name) => {
+  try {
+    const res = await fetch(`${BASE_URL}/api/parts/${category}/${encodeURIComponent(name)}`);
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.error("❌ fetchPartDetail 오류:", err);
+    return null;
+  }
 };
 
-// ✅ 가격 추이 (더미)
-export const fetchPriceHistory = async () => {
-  return [
-    { date: "2024-12", price: 560000 },
-    { date: "2025-01", price: 570000 },
-    { date: "2025-02", price: 545000 },
-    { date: "2025-03", price: 552000 },
-  ];
+// ✅ 가격 히스토리 (이제 실제 데이터 활용 가능)
+export const fetchPriceHistory = async (name) => {
+  try {
+    const res = await fetch(`${BASE_URL}/api/parts/cpu/${encodeURIComponent(name)}`);
+    const data = await res.json();
+    return data.priceHistory || [];
+  } catch (err) {
+    console.error("❌ fetchPriceHistory 오류:", err);
+    return [];
+  }
 };

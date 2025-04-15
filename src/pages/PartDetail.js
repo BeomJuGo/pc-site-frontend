@@ -1,104 +1,96 @@
-// ✅ src/pages/PartDetail.js
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { fetchPartDetail } from "../utils/api";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-} from "recharts";
+const BASE_URL = "https://pc-site-backend.onrender.com";
 
-const Detail = () => {
-  const { category, id } = useParams();
-  const [part, setPart] = useState(null);
-  const [loading, setLoading] = useState(true);
+// ✅ 문자열 정제 함수
+const cleanQuery = (raw) => raw.split("\n")[0].split("(")[0].trim();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const detail = await fetchPartDetail(category, decodeURIComponent(id));
-      setPart(detail);
-      setLoading(false);
-    };
-    fetchData();
-  }, [category, id]);
-
-  if (loading)
-    return <div className="text-center text-gray-500">⏳ 로딩 중...</div>;
-
-  if (!part)
-    return (
-      <div className="text-center text-red-500">
-        ❌ 부품 정보를 불러올 수 없습니다.
-      </div>
-    );
-
-  return (
-    <div className="max-w-3xl mx-auto p-4">
-      <h2 className="text-3xl font-bold mb-4">{part.name}</h2>
-
-      <div className="flex items-start gap-4">
-        {part.image && (
-          <img
-            src={part.image}
-            alt={part.name}
-            className="w-36 h-36 object-contain border rounded"
-          />
-        )}
-
-        <div className="flex-1">
-          <p className="mb-2">
-            💰 가격: {isNaN(Number(part.price)) ? part.price : `${Number(part.price).toLocaleString()}원`}
-          </p>
-
-          {part.benchmarkScore && (
-            <div className="mb-2">
-              ⚙️ Geekbench 점수:
-              <ul className="ml-5 list-disc text-sm">
-                <li>싱글 코어: {part.benchmarkScore.singleCore}</li>
-                <li>멀티 코어: {part.benchmarkScore.multiCore}</li>
-              </ul>
-            </div>
-          )}
-
-          {part.specSummary && (
-            <div className="mb-2">
-              📋 주요 사양 요약:
-              <p className="ml-4 text-sm text-gray-800 whitespace-pre-line">
-                {part.specSummary}
-              </p>
-            </div>
-          )}
-
-          {part.review && (
-            <p className="italic text-blue-600 whitespace-pre-line mt-2">
-              💬 {part.review}
-            </p>
-          )}
-        </div>
-      </div>
-
-      <div className="mt-10">
-        <h3 className="text-xl font-semibold mb-2">📈 가격 변동 추이</h3>
-        {part.priceHistory?.length > 0 ? (
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={part.priceHistory}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis tickFormatter={(v) => `${v.toLocaleString()}원`} />
-              <Tooltip formatter={(value) => `${Number(value).toLocaleString()}원`} />
-              <Line type="monotone" dataKey="price" stroke="#3b82f6" strokeWidth={2} />
-            </LineChart>
-          </ResponsiveContainer>
-        ) : (
-          <p className="text-gray-500">가격 정보 없음</p>
-        )}
-      </div>
-    </div>
-  );
+// ✅ CPU 목록 자동 불러오기
+export const fetchParts = async (category) => {
+  try {
+    const res = await fetch(`${BASE_URL}/api/parts/${category}`);
+    const data = await res.json();
+    return data.map((part, i) => ({ id: i + 1, ...part }));
+  } catch (err) {
+    console.error("❌ fetchParts 오류:", err);
+    return [];
+  }
 };
 
-export default Detail;
+// ✅ 네이버 가격 + 이미지 가져오기
+export const fetchNaverPrice = async (query) => {
+  try {
+    const clean = cleanQuery(query);
+    const res = await fetch(`${BASE_URL}/api/naver-price?query=${encodeURIComponent(clean)}`);
+    const data = await res.json();
+    const item = data.items?.[0];
+    return {
+      price: item?.lprice || "가격 정보 없음",
+      image: item?.image || "",
+    };
+  } catch (err) {
+    console.error("❌ fetchNaverPrice 오류:", err);
+    return { price: "가격 정보 오류", image: "" };
+  }
+};
+
+// ✅ GPT API
+export const fetchGptInfo = async (partName, category) => {
+  try {
+    const res = await fetch(`${BASE_URL}/api/gpt-info`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ partName, category }),
+    });
+    const data = await res.json();
+    return {
+      review: data.review || "한줄평 없음",
+      specSummary: data.specSummary || "사양 없음",
+    };
+  } catch (err) {
+    console.error("❌ fetchGptInfo 오류:", err);
+    return { review: "AI 한줄평 오류", specSummary: "사양 요약 오류" };
+  }
+};
+
+// ✅ 부품 상세 정보 (이름 기반)
+export const fetchPartDetail = async (category, name) => {
+  try {
+    const res = await fetch(`${BASE_URL}/api/parts/${category}/${encodeURIComponent(cleanQuery(name))}`);
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.error("❌ fetchPartDetail 오류:", err);
+    return null;
+  }
+};
+
+// ✅ 가격 히스토리
+export const fetchPriceHistory = async (name) => {
+  try {
+    const res = await fetch(`${BASE_URL}/api/parts/cpu/${encodeURIComponent(cleanQuery(name))}`);
+    const data = await res.json();
+    return data.priceHistory || [];
+  } catch (err) {
+    console.error("❌ fetchPriceHistory 오류:", err);
+    return [];
+  }
+};
+
+// ✅ 부품 전체 데이터 통합 (카드용)
+export const fetchFullPartData = async (category) => {
+  const parts = await fetchParts(category);
+
+  return await Promise.all(
+    parts.map(async (part) => {
+      const { price, image } = await fetchNaverPrice(part.name);
+      const { review, specSummary } = await fetchGptInfo(part.name, category);
+
+      // ✅ benchmarkScore는 fetchParts에서 가져온 값 사용
+      const benchmarkScore = part.benchmarkScore || {
+        singleCore: "-",
+        multiCore: "-",
+      };
+
+      return { ...part, price, image, review, specSummary, benchmarkScore };
+    })
+  );
+};

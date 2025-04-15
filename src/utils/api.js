@@ -1,7 +1,7 @@
 const BASE_URL = "https://pc-site-backend.onrender.com";
 
-// ✅ 문자열 정제 함수
-const cleanQuery = (raw) => raw.split("\n")[0].split("(")[0].trim();
+// ✅ 이름 정제 함수: 줄바꿈 제거 + 괄호 제거
+const cleanName = (raw) => raw.split("\n")[0].split("(")[0].trim();
 
 // ✅ CPU 목록 자동 불러오기
 export const fetchParts = async (category) => {
@@ -18,7 +18,7 @@ export const fetchParts = async (category) => {
 // ✅ 네이버 가격 + 이미지 가져오기
 export const fetchNaverPrice = async (query) => {
   try {
-    const clean = cleanQuery(query);
+    const clean = cleanName(query);
     const res = await fetch(`${BASE_URL}/api/naver-price?query=${encodeURIComponent(clean)}`);
     const data = await res.json();
     const item = data.items?.[0];
@@ -32,13 +32,14 @@ export const fetchNaverPrice = async (query) => {
   }
 };
 
-// ✅ GPT API
+// ✅ GPT 요약 + 한줄평 가져오기
 export const fetchGptInfo = async (partName, category) => {
   try {
+    const clean = cleanName(partName);
     const res = await fetch(`${BASE_URL}/api/gpt-info`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ partName, category }),
+      body: JSON.stringify({ partName: clean, category }),
     });
     const data = await res.json();
     return {
@@ -51,10 +52,10 @@ export const fetchGptInfo = async (partName, category) => {
   }
 };
 
-// ✅ 부품 상세 정보 (이름 기반)
+// ✅ 부품 상세 정보 (정제된 이름 기준)
 export const fetchPartDetail = async (category, name) => {
   try {
-    const res = await fetch(`${BASE_URL}/api/parts/${category}/${encodeURIComponent(cleanQuery(name))}`);
+    const res = await fetch(`${BASE_URL}/api/parts/${category}/${encodeURIComponent(cleanName(name))}`);
     const data = await res.json();
     return data;
   } catch (err) {
@@ -66,7 +67,7 @@ export const fetchPartDetail = async (category, name) => {
 // ✅ 가격 히스토리
 export const fetchPriceHistory = async (name) => {
   try {
-    const res = await fetch(`${BASE_URL}/api/parts/cpu/${encodeURIComponent(cleanQuery(name))}`);
+    const res = await fetch(`${BASE_URL}/api/parts/cpu/${encodeURIComponent(cleanName(name))}`);
     const data = await res.json();
     return data.priceHistory || [];
   } catch (err) {
@@ -81,9 +82,11 @@ export const fetchFullPartData = async (category) => {
 
   return await Promise.all(
     parts.map(async (part) => {
+      const clean = cleanName(part.name);
+
       const [{ price, image }, { review, specSummary }] = await Promise.all([
-        fetchNaverPrice(part.name),
-        fetchGptInfo(part.name, category),
+        fetchNaverPrice(clean),
+        fetchGptInfo(clean, category),
       ]);
 
       const benchmarkScore = part.benchmarkScore || {

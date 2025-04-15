@@ -1,4 +1,3 @@
-// ✅ src/pages/Category.js
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchFullPartData } from "../utils/api";
@@ -14,8 +13,8 @@ const Category = () => {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const enrichedParts = await fetchFullPartData(category);
-      setParts(enrichedParts);
+      const data = await fetchFullPartData(category);
+      setParts(data);
       setLoading(false);
     };
 
@@ -23,9 +22,9 @@ const Category = () => {
   }, [category]);
 
   const filteredParts = parts
-    .filter((part) => part.name.toLowerCase().includes(search.toLowerCase()))
+    .filter((part) => part.name?.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => {
-      if (sortBy === "price") return a.price - b.price;
+      if (sortBy === "price") return Number(a.price) - Number(b.price);
       if (sortBy === "score") return (b.benchmarkScore?.multiCore || 0) - (a.benchmarkScore?.multiCore || 0);
       return a.name.localeCompare(b.name);
     });
@@ -38,7 +37,7 @@ const Category = () => {
     <div className="p-4 sm:p-8">
       <h2 className="text-3xl font-bold mb-6">{category.toUpperCase()} 목록</h2>
 
-      {/* 🔍 검색 + 정렬 필터 */}
+      {/* 🔍 검색 + 정렬 */}
       <div className="flex flex-wrap gap-4 mb-6 items-center">
         <input
           type="text"
@@ -59,38 +58,59 @@ const Category = () => {
         </select>
       </div>
 
+      {/* 🔍 카드 목록 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredParts.map((part) => (
-          <div
-            key={part.id}
-            onClick={() => navigate(`/detail/${category}/${encodeURIComponent(part.name)}`)}
-            className="cursor-pointer p-5 border border-gray-200 rounded-xl shadow-md bg-white hover:shadow-lg transition-all duration-300"
-          >
-            <div className="flex justify-between items-start mb-3">
-              <h3 className="text-xl font-semibold">{part.name}</h3>
-              {part.image && (
-                <img src={part.image} alt={part.name} className="w-20 h-20 object-contain rounded border" />
-              )}
-            </div>
-
-            <p className="text-gray-700 mb-1">💰 가격: {Number(part.price).toLocaleString()}원</p>
-
-            {category === "cpu" ? (
-              <div className="text-gray-700 mb-1">
-                ⚙️ Geekbench 점수:
-                <ul className="ml-4 list-disc">
-                  <li>싱글 코어: {part.benchmarkScore.singleCore}</li>
-                  <li>멀티 코어: {part.benchmarkScore.multiCore}</li>
-                </ul>
-              </div>
-            ) : (
-              <p className="text-gray-700 mb-1">⚙️ 벤치마크 점수: {part.benchmarkScore}</p>
-            )}
-
-            <p className="text-blue-600 italic mt-2">💬 {part.review}</p>
-          </div>
+          <PartCard key={part.id} part={part} category={category} onClick={() =>
+            navigate(`/detail/${category}/${encodeURIComponent(part.name)}`)
+          } />
         ))}
       </div>
+    </div>
+  );
+};
+
+// ✅ 부품 카드 컴포넌트
+const PartCard = ({ part, category, onClick }) => {
+  const price = isNaN(Number(part.price))
+    ? part.price
+    : `${Number(part.price).toLocaleString()}원`;
+
+  return (
+    <div
+      onClick={onClick}
+      className="cursor-pointer p-5 border border-gray-200 rounded-xl shadow-md bg-white hover:shadow-lg transition-all duration-300"
+    >
+      <div className="flex justify-between items-start mb-3">
+        <h3 className="text-xl font-semibold">{part.name}</h3>
+        {part.image && (
+          <img
+            src={part.image}
+            alt={part.name}
+            className="w-20 h-20 object-contain rounded border"
+          />
+        )}
+      </div>
+
+      <p className="text-gray-700 mb-1">💰 가격: {price}</p>
+
+      {category === "cpu" && part.benchmarkScore ? (
+        <div className="text-gray-700 mb-1 text-sm">
+          ⚙️ Geekbench 점수:
+          <ul className="ml-4 list-disc">
+            <li>싱글 코어: {part.benchmarkScore.singleCore}</li>
+            <li>멀티 코어: {part.benchmarkScore.multiCore}</li>
+          </ul>
+        </div>
+      ) : (
+        <p className="text-gray-700 mb-1">
+          ⚙️ 벤치마크 점수: {part.benchmarkScore || "없음"}
+        </p>
+      )}
+
+      {part.review && (
+        <p className="text-blue-600 italic mt-2 text-sm">💬 {part.review}</p>
+      )}
     </div>
   );
 };

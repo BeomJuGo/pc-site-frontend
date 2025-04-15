@@ -51,18 +51,6 @@ export const fetchGptInfo = async (partName, category) => {
   }
 };
 
-// ✅ CPU 벤치마크 점수 (MongoDB에서 가져옴)
-export const fetchCpuBenchmark = async (cpuName) => {
-  try {
-    const res = await fetch(`${BASE_URL}/api/parts/cpu/${encodeURIComponent(cleanQuery(cpuName))}`);
-    const data = await res.json();
-    return data.benchmarkScore || { singleCore: "점수 없음", multiCore: "점수 없음" };
-  } catch (err) {
-    console.error("❌ fetchCpuBenchmark 오류:", err);
-    return { singleCore: "점수 없음", multiCore: "점수 없음" };
-  }
-};
-
 // ✅ 부품 상세 정보 (이름 기반)
 export const fetchPartDetail = async (category, name) => {
   try {
@@ -93,13 +81,15 @@ export const fetchFullPartData = async (category) => {
 
   return await Promise.all(
     parts.map(async (part) => {
-      const { price, image } = await fetchNaverPrice(part.name);
-      const { review, specSummary } = await fetchGptInfo(part.name, category);
+      const [{ price, image }, { review, specSummary }] = await Promise.all([
+        fetchNaverPrice(part.name),
+        fetchGptInfo(part.name, category),
+      ]);
 
-      const benchmarkScore =
-        category === "cpu"
-          ? await fetchCpuBenchmark(part.name)
-          : { singleCore: "-", multiCore: "-" };
+      const benchmarkScore = part.benchmarkScore || {
+        singleCore: "-",
+        multiCore: "-",
+      };
 
       return { ...part, price, image, review, specSummary, benchmarkScore };
     })

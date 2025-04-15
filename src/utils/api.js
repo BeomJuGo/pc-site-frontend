@@ -84,3 +84,22 @@ export const fetchPriceHistory = async (name) => {
     return [];
   }
 };
+
+// ✅ 부품 전체 데이터 통합 (카드용)
+export const fetchFullPartData = async (category) => {
+  const parts = await fetchParts(category);
+
+  return await Promise.all(
+    parts.map(async (part) => {
+      const { price, image } = await fetchNaverPrice(part.name);
+      const { review, specSummary } = await fetchGptInfo(part.name, category);
+
+      const benchmarkScore =
+        category === "cpu"
+          ? await fetchCpuBenchmark(part.name)
+          : { singleCore: "-", multiCore: "-" };
+
+      return { ...part, price, image, review, specSummary, benchmarkScore };
+    })
+  );
+};

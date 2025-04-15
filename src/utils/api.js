@@ -17,7 +17,9 @@ export const fetchParts = async (category) => {
 // ✅ 네이버 가격 + 이미지 가져오기
 export const fetchNaverPrice = async (query) => {
   try {
-    const res = await fetch(`${BASE_URL}/api/naver-price?query=${encodeURIComponent(query)}`);
+    // ✅ 줄바꿈 제거 및 괄호 이후 잘라내기
+    const cleanQuery = query.split("\n")[0].split("(")[0].trim();
+    const res = await fetch(`${BASE_URL}/api/naver-price?query=${encodeURIComponent(cleanQuery)}`);
     const data = await res.json();
     const item = data.items?.[0];
     return {

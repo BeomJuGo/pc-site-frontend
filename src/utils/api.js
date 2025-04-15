@@ -1,6 +1,7 @@
-// ✅ src/utils/api.js
+const BASE_URL = "https://pc-site-backend.onrender.com";
 
-const BASE_URL = "https://pc-site-backend.onrender.com"; // 너의 백엔드 주소
+// ✅ 문자열 정제 함수
+const cleanQuery = (raw) => raw.split("\n")[0].split("(")[0].trim();
 
 // ✅ CPU 목록 자동 불러오기
 export const fetchParts = async (category) => {
@@ -17,9 +18,8 @@ export const fetchParts = async (category) => {
 // ✅ 네이버 가격 + 이미지 가져오기
 export const fetchNaverPrice = async (query) => {
   try {
-    // ✅ 줄바꿈 제거 및 괄호 이후 잘라내기
-    const cleanQuery = query.split("\n")[0].split("(")[0].trim();
-    const res = await fetch(`${BASE_URL}/api/naver-price?query=${encodeURIComponent(cleanQuery)}`);
+    const clean = cleanQuery(query);
+    const res = await fetch(`${BASE_URL}/api/naver-price?query=${encodeURIComponent(clean)}`);
     const data = await res.json();
     const item = data.items?.[0];
     return {
@@ -51,10 +51,10 @@ export const fetchGptInfo = async (partName, category) => {
   }
 };
 
-// ✅ CPU 벤치마크 점수
+// ✅ CPU 벤치마크 점수 (MongoDB에서 가져옴)
 export const fetchCpuBenchmark = async (cpuName) => {
   try {
-    const res = await fetch(`${BASE_URL}/api/cpu-benchmark?cpu=${encodeURIComponent(cpuName)}`);
+    const res = await fetch(`${BASE_URL}/api/parts/cpu/${encodeURIComponent(cleanQuery(cpuName))}`);
     const data = await res.json();
     return data.benchmarkScore || { singleCore: "점수 없음", multiCore: "점수 없음" };
   } catch (err) {
@@ -66,7 +66,7 @@ export const fetchCpuBenchmark = async (cpuName) => {
 // ✅ 부품 상세 정보 (이름 기반)
 export const fetchPartDetail = async (category, name) => {
   try {
-    const res = await fetch(`${BASE_URL}/api/parts/${category}/${encodeURIComponent(name)}`);
+    const res = await fetch(`${BASE_URL}/api/parts/${category}/${encodeURIComponent(cleanQuery(name))}`);
     const data = await res.json();
     return data;
   } catch (err) {
@@ -75,10 +75,10 @@ export const fetchPartDetail = async (category, name) => {
   }
 };
 
-// ✅ 가격 히스토리 (이제 실제 데이터 활용 가능)
+// ✅ 가격 히스토리
 export const fetchPriceHistory = async (name) => {
   try {
-    const res = await fetch(`${BASE_URL}/api/parts/cpu/${encodeURIComponent(name)}`);
+    const res = await fetch(`${BASE_URL}/api/parts/cpu/${encodeURIComponent(cleanQuery(name))}`);
     const data = await res.json();
     return data.priceHistory || [];
   } catch (err) {

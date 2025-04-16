@@ -53,9 +53,21 @@ const Detail = () => {
         )}
 
         <div className="flex-1">
-          <p className="mb-2">
-            💰 현재 가격: {isNaN(Number(part.price)) ? part.price : `${Number(part.price).toLocaleString()}원`}
-          </p>
+         <p className="mb-2">
+  💰 현재 가격: {isNaN(Number(part.price)) ? "가격 정보 없음" : `${Number(part.price).toLocaleString()}원`}
+</p>
+
+{part.image ? (
+  <img
+    src={part.image}
+    alt={part.name}
+    className="w-36 h-36 object-contain border rounded"
+  />
+) : (
+  <div className="w-36 h-36 flex items-center justify-center bg-gray-100 text-gray-500 border rounded">
+    이미지 없음
+  </div>
+)}
 
           {part.benchmarkScore && (
             <div className="mb-2">

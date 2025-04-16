@@ -68,12 +68,12 @@ const Category = () => {
           onChange={(e) => setSortBy(e.target.value)}
           className="border px-2 py-2 rounded-md shadow-sm"
         >
+          <option value="value">💡 가성비순</option>  
           <option value="name">이름순</option>
           <option value="price">💰 가격 낮은순</option>
           <option value="price-desc">💰 가격 높은순</option>
           <option value="score">⚙️ 벤치마크 높은순</option>
           <option value="score-asc">⚙️ 벤치마크 낮은순</option>
-          <option value="value">💡 가성비순</option>
         </select>
 
         <div className="flex gap-2">

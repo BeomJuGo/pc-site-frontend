@@ -8,7 +8,7 @@ const Category = () => {
   const [parts, setParts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [sortBy, setSortBy] = useState("name");
+  const [sortBy, setSortBy] = useState("value");
   const [brandFilter, setBrandFilter] = useState("all");
 
   useEffect(() => {

@@ -49,6 +49,7 @@ const Category = () => {
     <div className="p-4 sm:p-8">
       <h2 className="text-3xl font-bold mb-6">{category.toUpperCase()} 목록</h2>
 
+      {/* 🔍 검색 및 필터 */}
       <div className="flex flex-wrap gap-4 mb-6 items-center">
         <input
           type="text"
@@ -57,6 +58,7 @@ const Category = () => {
           onChange={(e) => setSearch(e.target.value)}
           className="border px-3 py-2 rounded-md shadow-sm w-64"
         />
+
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
@@ -84,28 +86,56 @@ const Category = () => {
         </div>
       </div>
 
+      {/* 💻 부품 카드 목록 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filtered.map((part) => (
           <div
             key={part.id}
             onClick={() => navigate(`/detail/${category}/${encodeURIComponent(part.name)}`)}
-            className="cursor-pointer p-5 border rounded-xl shadow bg-white hover:shadow-lg"
+            className="cursor-pointer p-5 border rounded-xl shadow bg-white hover:shadow-lg transition-all"
           >
             <div className="flex justify-between items-start mb-3">
               <h3 className="text-lg font-semibold">{part.name}</h3>
               {part.image ? (
-                <img src={part.image} className="w-20 h-20 object-contain border rounded" />
+                <img
+                  src={part.image}
+                  alt={part.name}
+                  className="w-20 h-20 object-contain border rounded"
+                />
               ) : (
-                <div className="w-20 h-20 border flex items-center justify-center text-sm bg-gray-100">이미지 없음</div>
+                <div className="w-20 h-20 border flex items-center justify-center text-sm bg-gray-100">
+                  이미지 없음
+                </div>
               )}
             </div>
-            <p>💰 {isNaN(part.price) ? "가격 정보 없음" : `${Number(part.price).toLocaleString()}원`}</p>
+
+            <p className="text-gray-700">
+              💰 가격:{" "}
+              {isNaN(part.price)
+                ? "가격 정보 없음"
+                : `${Number(part.price).toLocaleString()}원`}
+            </p>
+
             <ul className="text-sm ml-4 list-disc text-gray-600 mt-1">
-              <li>PassMark: {part.benchmarkScore.passmarkscore}</li>
-              <li>Cinebench Single: {part.benchmarkScore.cinebenchSingle}</li>
-              <li>Cinebench Multi: {part.benchmarkScore.cinebenchMulti}</li>
+              <li>
+                PassMark:{" "}
+                {part.benchmarkScore.passmarkscore != null
+                  ? part.benchmarkScore.passmarkscore.toLocaleString()
+                  : "정보 없음"}
+              </li>
+              <li>
+                Cinebench Single:{" "}
+                {part.benchmarkScore.cinebenchSingle || "정보 없음"}
+              </li>
+              <li>
+                Cinebench Multi:{" "}
+                {part.benchmarkScore.cinebenchMulti || "정보 없음"}
+              </li>
             </ul>
-            <p className="text-blue-600 mt-2 italic">{part.review}</p>
+
+            <p className="text-blue-600 mt-2 italic text-sm">
+              💬 {part.review || "리뷰 없음"}
+            </p>
           </div>
         ))}
       </div>

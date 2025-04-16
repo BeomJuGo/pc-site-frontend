@@ -13,21 +13,20 @@ import {
 
 const Detail = () => {
   const { category, id } = useParams();
-  const decodedName = decodeURIComponent(id);
   const [part, setPart] = useState(null);
   const [priceHistory, setPriceHistory] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
-      const detail = await fetchPartDetail(category, decodedName);
-      const history = await fetchPriceHistory(decodedName);
+      const detail = await fetchPartDetail(category, decodeURIComponent(id));
+      const history = await fetchPriceHistory(decodeURIComponent(id));
       setPart(detail);
       setPriceHistory(history);
       setLoading(false);
     };
     fetchData();
-  }, [category, decodedName]);
+  }, [category, id]);
 
   if (loading)
     return <div className="text-center text-gray-500">⏳ 로딩 중...</div>;
@@ -39,9 +38,10 @@ const Detail = () => {
       </div>
     );
 
-  const formattedPrice = isNaN(Number(part.price))
-    ? part.price
-    : `${Number(part.price).toLocaleString()}원`;
+  const latestPrice =
+    Array.isArray(part.priceHistory) && part.priceHistory.length > 0
+      ? part.priceHistory.at(-1).price
+      : "가격 정보 없음";
 
   return (
     <div className="max-w-3xl mx-auto p-4">
@@ -56,13 +56,15 @@ const Detail = () => {
           />
         )}
 
-        <div className="flex-1 space-y-2 text-sm text-gray-800">
-          <p>💰 현재 가격: {formattedPrice}</p>
+        <div className="flex-1">
+          <p className="mb-2">
+            💰 현재 가격: {isNaN(Number(latestPrice)) ? latestPrice : `${Number(latestPrice).toLocaleString()}원`}
+          </p>
 
           {part.benchmarkScore && (
-            <div>
+            <div className="mb-2">
               ⚙️ Geekbench 점수:
-              <ul className="ml-5 list-disc">
+              <ul className="ml-5 list-disc text-sm">
                 <li>싱글 코어: {part.benchmarkScore.singleCore}</li>
                 <li>멀티 코어: {part.benchmarkScore.multiCore}</li>
               </ul>
@@ -70,14 +72,16 @@ const Detail = () => {
           )}
 
           {part.specSummary && (
-            <div>
+            <div className="mb-2">
               📋 주요 사양 요약:
-              <p className="ml-4 whitespace-pre-line">{part.specSummary}</p>
+              <p className="ml-4 text-sm text-gray-800 whitespace-pre-line">
+                {part.specSummary}
+              </p>
             </div>
           )}
 
           {part.review && (
-            <p className="italic text-blue-600 whitespace-pre-line">
+            <p className="italic text-blue-600 whitespace-pre-line mt-2">
               💬 {part.review}
             </p>
           )}

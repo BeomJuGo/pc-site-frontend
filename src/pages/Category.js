@@ -50,26 +50,34 @@ const Category = () => {
       <h2 className="text-3xl font-bold mb-6">{category.toUpperCase()} 목록</h2>
 
       {/* 🔍 검색 및 필터 */}
-      <div className="flex flex-wrap gap-4 mb-6 items-center">
-        <input
-          type="text"
-          placeholder="🔍 이름 검색"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="border px-3 py-2 rounded-md shadow-sm w-64"
-        />
+<div className="flex flex-wrap gap-4 mb-6 items-center">
+  <button
+    onClick={() => navigate("/")}
+    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md shadow-sm"
+  >
+    ⬅️ 홈으로
+  </button>
 
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          className="border px-2 py-2 rounded-md shadow-sm"
-        >
-          <option value="value">💡 가성비순</option>
-          <option value="price">💰 가격 낮은순</option>
-          <option value="price-desc">💰 가격 높은순</option>
-          <option value="score">📊 PassMark 점수순</option>
-          <option value="name">🔤 이름순</option>
-        </select>
+  <input
+    type="text"
+    placeholder="🔍 이름 검색"
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
+    className="border px-3 py-2 rounded-md shadow-sm w-64"
+  />
+  
+  <select
+    value={sortBy}
+    onChange={(e) => setSortBy(e.target.value)}
+    className="border px-2 py-2 rounded-md shadow-sm"
+  >
+    <option value="value">💡 가성비순</option>
+    <option value="price">💰 가격 낮은순</option>
+    <option value="price-desc">💰 가격 높은순</option>
+    <option value="score">📊 PassMark 점수순</option>
+    <option value="name">🔤 이름순</option>
+  </select>
+
 
         <div className="flex gap-2">
           {["all", "intel", "amd"].map((brand) => (

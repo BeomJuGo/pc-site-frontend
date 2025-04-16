@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { fetchPartDetail, fetchPriceHistory } from "../utils/api";
+import { fetchPartDetail } from "../utils/api";
 import {
   LineChart,
   Line,
@@ -14,34 +14,26 @@ import {
 const Detail = () => {
   const { category, id } = useParams();
   const [part, setPart] = useState(null);
-  const [priceHistory, setPriceHistory] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const detail = await fetchPartDetail(category, decodeURIComponent(id));
-      const history = await fetchPriceHistory(decodeURIComponent(id));
-      setPart(detail);
-      setPriceHistory(history);
+    const fetch = async () => {
+      const data = await fetchPartDetail(category, decodeURIComponent(id));
+      setPart(data);
       setLoading(false);
     };
-    fetchData();
+    fetch();
   }, [category, id]);
 
-  if (loading)
+  if (loading) {
     return <div className="text-center text-gray-500">⏳ 로딩 중...</div>;
+  }
 
-  if (!part)
-    return (
-      <div className="text-center text-red-500">
-        ❌ 부품 정보를 불러올 수 없습니다.
-      </div>
-    );
+  if (!part) {
+    return <div className="text-center text-red-500">❌ 부품 정보를 찾을 수 없습니다.</div>;
+  }
 
-  const latestPrice =
-    Array.isArray(part.priceHistory) && part.priceHistory.length > 0
-      ? part.priceHistory.at(-1).price
-      : "가격 정보 없음";
+  const latestPrice = part.priceHistory?.[part.priceHistory.length - 1]?.price || "가격 정보 없음";
 
   return (
     <div className="max-w-3xl mx-auto p-4">
@@ -57,9 +49,7 @@ const Detail = () => {
         )}
 
         <div className="flex-1">
-          <p className="mb-2">
-            💰 현재 가격: {isNaN(Number(latestPrice)) ? latestPrice : `${Number(latestPrice).toLocaleString()}원`}
-          </p>
+          <p className="mb-2">💰 현재 가격: {Number(latestPrice).toLocaleString()}원</p>
 
           {part.benchmarkScore && (
             <div className="mb-2">
@@ -81,18 +71,16 @@ const Detail = () => {
           )}
 
           {part.review && (
-            <p className="italic text-blue-600 whitespace-pre-line mt-2">
-              💬 {part.review}
-            </p>
+            <p className="italic text-blue-600 whitespace-pre-line mt-2">💬 {part.review}</p>
           )}
         </div>
       </div>
 
       <div className="mt-10">
         <h3 className="text-xl font-semibold mb-2">📈 가격 변동 추이</h3>
-        {priceHistory?.length > 0 ? (
+        {part.priceHistory?.length > 0 ? (
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={priceHistory}>
+            <LineChart data={part.priceHistory}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
               <YAxis tickFormatter={(v) => `${v.toLocaleString()}원`} />

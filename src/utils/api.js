@@ -1,8 +1,10 @@
+// ✅ src/utils/api.js
 const BASE_URL = "https://pc-site-backend.onrender.com";
 
-// ✅ 이름 정제 함수
+// ✅ 이름 정제 함수 (줄바꿈 제거 + 괄호 제거)
 const cleanName = (raw) => raw.split("\n")[0].split("(")[0].trim();
 
+// ✅ 부품 목록 불러오기
 export const fetchParts = async (category) => {
   try {
     const res = await fetch(`${BASE_URL}/api/parts/${category}`);
@@ -14,6 +16,7 @@ export const fetchParts = async (category) => {
   }
 };
 
+// ✅ 상세 정보
 export const fetchPartDetail = async (category, name) => {
   try {
     const res = await fetch(`${BASE_URL}/api/parts/${category}/${encodeURIComponent(cleanName(name))}`);
@@ -24,6 +27,7 @@ export const fetchPartDetail = async (category, name) => {
   }
 };
 
+// ✅ 가격 히스토리
 export const fetchPriceHistory = async (name) => {
   try {
     const res = await fetch(`${BASE_URL}/api/parts/cpu/${encodeURIComponent(cleanName(name))}`);
@@ -35,6 +39,7 @@ export const fetchPriceHistory = async (name) => {
   }
 };
 
+// ✅ 전체 부품 정보 (카드 렌더용)
 export const fetchFullPartData = async (category) => {
   const parts = await fetchParts(category);
   return parts.map((part) => ({

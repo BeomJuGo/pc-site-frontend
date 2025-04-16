@@ -8,7 +8,7 @@ const Category = () => {
   const [parts, setParts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [sortBy, setSortBy] = useState("value");
+  const [sortBy, setSortBy] = useState("value"); // ✅ 기본 정렬: 가성비
   const [brandFilter, setBrandFilter] = useState("all");
 
   useEffect(() => {
@@ -32,8 +32,8 @@ const Category = () => {
       return nameMatch && brandMatch;
     })
     .sort((a, b) => {
-      const aPrice = Number(a.price);
-      const bPrice = Number(b.price);
+      const aPrice = Number(a.price) || 1;
+      const bPrice = Number(b.price) || 1;
       const aScore = a.benchmarkScore?.multiCore || 0;
       const bScore = b.benchmarkScore?.multiCore || 0;
 
@@ -41,7 +41,7 @@ const Category = () => {
       if (sortBy === "price-desc") return bPrice - aPrice;
       if (sortBy === "score") return bScore - aScore;
       if (sortBy === "score-asc") return aScore - bScore;
-      if (sortBy === "value") return bScore / bPrice - aScore / aPrice; // 가성비
+      if (sortBy === "value") return (bScore / bPrice) - (aScore / aPrice); // ✅ 가성비순
       return a.name.localeCompare(b.name);
     });
 
@@ -68,7 +68,7 @@ const Category = () => {
           onChange={(e) => setSortBy(e.target.value)}
           className="border px-2 py-2 rounded-md shadow-sm"
         >
-          <option value="value">💡 가성비순</option>  
+          <option value="value">💡 가성비순</option>
           <option value="name">이름순</option>
           <option value="price">💰 가격 낮은순</option>
           <option value="price-desc">💰 가격 높은순</option>
@@ -77,18 +77,19 @@ const Category = () => {
         </select>
 
         <div className="flex gap-2">
-          <button
-            onClick={() => setBrandFilter("all")}
-            className={`px-3 py-2 border rounded-md ${brandFilter === "all" ? "bg-blue-500 text-white" : "bg-white"}`}
-          >전체</button>
-          <button
-            onClick={() => setBrandFilter("intel")}
-            className={`px-3 py-2 border rounded-md ${brandFilter === "intel" ? "bg-blue-500 text-white" : "bg-white"}`}
-          >Intel</button>
-          <button
-            onClick={() => setBrandFilter("amd")}
-            className={`px-3 py-2 border rounded-md ${brandFilter === "amd" ? "bg-blue-500 text-white" : "bg-white"}`}
-          >AMD</button>
+          {["all", "intel", "amd"].map((brand) => (
+            <button
+              key={brand}
+              onClick={() => setBrandFilter(brand)}
+              className={`px-3 py-2 border rounded-md ${
+                brandFilter === brand
+                  ? "bg-blue-500 text-white"
+                  : "bg-white text-gray-700"
+              }`}
+            >
+              {brand === "all" ? "전체" : brand.toUpperCase()}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -111,10 +112,13 @@ const Category = () => {
             </div>
 
             <p className="text-gray-700 mb-1">
-              💰 가격: {Number(part.price).toLocaleString()}원
+              💰 가격:{" "}
+              {isNaN(Number(part.price))
+                ? "정보 없음"
+                : `${Number(part.price).toLocaleString()}원`}
             </p>
 
-            {category === "cpu" ? (
+            {category === "cpu" && part.benchmarkScore && (
               <div className="text-gray-700 mb-1">
                 ⚙️ Geekbench 점수:
                 <ul className="ml-4 list-disc">
@@ -122,13 +126,11 @@ const Category = () => {
                   <li>멀티 코어: {part.benchmarkScore.multiCore}</li>
                 </ul>
               </div>
-            ) : (
-              <p className="text-gray-700 mb-1">
-                ⚙️ 벤치마크 점수: {part.benchmarkScore}
-              </p>
             )}
 
-            <p className="text-blue-600 italic mt-2">💬 {part.review}</p>
+            <p className="text-blue-600 italic mt-2 line-clamp-2">
+              💬 {part.review}
+            </p>
           </div>
         ))}
       </div>

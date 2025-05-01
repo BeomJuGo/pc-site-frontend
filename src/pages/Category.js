@@ -11,6 +11,8 @@ const Category = () => {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("value");
   const [brandFilter, setBrandFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
 
   useEffect(() => {
     const loadData = async () => {
@@ -21,6 +23,11 @@ const Category = () => {
     };
     loadData();
   }, [category]);
+
+  // 페이지 초기화: 검색어, 정렬, 브랜드 필터 바뀌면 페이지 1로
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, sortBy, brandFilter]);
 
   const filtered = parts
     .filter((part) => {
@@ -45,39 +52,43 @@ const Category = () => {
       return a.name.localeCompare(b.name);
     });
 
+  // 페이지네이션 처리
+  const startIdx = (currentPage - 1) * itemsPerPage;
+  const paginated = filtered.slice(startIdx, startIdx + itemsPerPage);
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+
   return (
     <div className="p-4 sm:p-8">
       <h2 className="text-3xl font-bold mb-6">{category.toUpperCase()} 목록</h2>
 
       {/* 🔍 검색 및 필터 */}
-<div className="flex flex-wrap gap-4 mb-6 items-center">
-  <button
-    onClick={() => navigate("/")}
-    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md shadow-sm"
-  >
-    ⬅️ 홈으로
-  </button>
+      <div className="flex flex-wrap gap-4 mb-6 items-center">
+        <button
+          onClick={() => navigate("/")}
+          className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md shadow-sm"
+        >
+          ⬅️ 홈으로
+        </button>
 
-  <input
-    type="text"
-    placeholder="🔍 이름 검색"
-    value={search}
-    onChange={(e) => setSearch(e.target.value)}
-    className="border px-3 py-2 rounded-md shadow-sm w-64"
-  />
-  
-  <select
-    value={sortBy}
-    onChange={(e) => setSortBy(e.target.value)}
-    className="border px-2 py-2 rounded-md shadow-sm"
-  >
-    <option value="value">💡 가성비순</option>
-    <option value="price">💰 가격 낮은순</option>
-    <option value="price-desc">💰 가격 높은순</option>
-    <option value="score">📊 PassMark 점수순</option>
-    <option value="name">🔤 이름순</option>
-  </select>
+        <input
+          type="text"
+          placeholder="🔍 이름 검색"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="border px-3 py-2 rounded-md shadow-sm w-64"
+        />
 
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          className="border px-2 py-2 rounded-md shadow-sm"
+        >
+          <option value="value">💡 가성비순</option>
+          <option value="price">💰 가격 낮은순</option>
+          <option value="price-desc">💰 가격 높은순</option>
+          <option value="score">📊 PassMark 점수순</option>
+          <option value="name">🔤 이름순</option>
+        </select>
 
         <div className="flex gap-2">
           {["all", "intel", "amd"].map((brand) => (
@@ -96,7 +107,7 @@ const Category = () => {
 
       {/* 💻 부품 카드 목록 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filtered.map((part) => (
+        {paginated.map((part) => (
           <div
             key={part.id}
             onClick={() => navigate(`/detail/${category}/${encodeURIComponent(part.name)}`)}
@@ -146,6 +157,27 @@ const Category = () => {
             </p>
           </div>
         ))}
+      </div>
+
+      {/* 📄 페이지네이션 버튼 */}
+      <div className="flex justify-center mt-8 gap-2">
+        <button
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage(currentPage - 1)}
+          className="px-3 py-1 border rounded disabled:opacity-50"
+        >
+          ◀ 이전
+        </button>
+        <span className="px-4 py-1">
+          {currentPage} / {totalPages}
+        </span>
+        <button
+          disabled={currentPage === totalPages}
+          onClick={() => setCurrentPage(currentPage + 1)}
+          className="px-3 py-1 border rounded disabled:opacity-50"
+        >
+          다음 ▶
+        </button>
       </div>
     </div>
   );

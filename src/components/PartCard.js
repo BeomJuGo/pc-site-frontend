@@ -1,9 +1,9 @@
-// components/PartCard.js
+// ✅ src/components/PartCard.js
 import React from "react";
-import { useRouter } from "next/router";
+import { useNavigate } from "react-router-dom";
 
 const PartCard = ({ part, label }) => {
-  const router = useRouter();
+  const navigate = useNavigate();
 
   if (!part || part.name === "정보 없음") {
     return (
@@ -17,7 +17,7 @@ const PartCard = ({ part, label }) => {
   return (
     <div
       className="cursor-pointer border p-4 rounded shadow bg-white hover:shadow-lg transition"
-      onClick={() => router.push(`/detail/${part.category}/${part._id}`)}
+      onClick={() => navigate(`/detail/${part.category}/${part._id}`)}
     >
       <h2 className="text-lg font-semibold mb-1">🔧 {label}: {part.name}</h2>
       {part.image && <img src={part.image} alt={part.name} className="w-32 my-2" />}

@@ -1,13 +1,12 @@
+// ✅ src/pages/recommend.js
 import React, { useState } from "react";
 import axios from "axios";
-import { useRouter } from "next/router";
 import PartCard from "../components/PartCard";
 
 const Recommend = () => {
   const [budget, setBudget] = useState("");
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   const handleRecommend = async () => {
     if (!budget) return alert("예산을 입력해주세요!");

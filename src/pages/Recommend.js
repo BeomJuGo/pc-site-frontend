@@ -12,10 +12,11 @@ const Recommend = () => {
 
     setLoading(true);
     try {
-      const res = await axios.post("https://goodpricepc-backend.onrender.com/api/recommend", {
-  budget: Number(budget),
+      const res = await axios.post("https://pc-site-backend.onrender.com/api/recommend", {
+  budget,
   purpose,
 });
+
       setResults(res.data.recommendedCPUs);
     } catch (err) {
       alert("추천 실패 😢");

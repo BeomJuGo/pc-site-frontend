@@ -23,23 +23,34 @@ const Recommend = () => {
     setLoading(false);
   };
 
-  const renderPart = (label, part) => (
-    <div className="border p-4 rounded shadow bg-white">
-      <h2 className="text-lg font-semibold mb-1">🔧 {label}: {part?.name || "정보 없음"}</h2>
-      {part?.image && <img src={part.image} alt={part.name} className="w-32 my-2" />}
-      {part?.price && <p>💸 가격: {part.price.toLocaleString()}원</p>}
-      {part?.benchmarkScore?.passmarkscore && (
-        <p>🔥 PassMark: {part.benchmarkScore.passmarkscore}</p>
-      )}
-      {part?.benchmarkScore?.cinebenchSingle && (
-        <p>🎯 Cinebench Single: {part.benchmarkScore.cinebenchSingle}</p>
-      )}
-      {part?.benchmarkScore?.cinebenchMulti && (
-        <p>💪 Cinebench Multi: {part.benchmarkScore.cinebenchMulti}</p>
-      )}
-      {part?.reason && <p className="mt-2 text-sm italic text-gray-700">📝 {part.reason}</p>}
-    </div>
-  );
+  const renderPart = (label, part) => {
+    if (!part || !part.name) {
+      return (
+        <div className="border p-4 rounded shadow bg-white text-gray-500">
+          <h2 className="text-lg font-semibold mb-1">🔧 {label}</h2>
+          <p>추후에 추가될 예정입니다</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="border p-4 rounded shadow bg-white">
+        <h2 className="text-lg font-semibold mb-1">🔧 {label}: {part.name}</h2>
+        {part.image && <img src={part.image} alt={part.name} className="w-32 my-2" />}
+        {part.price && <p>💸 가격: {part.price.toLocaleString()}원</p>}
+        {part.benchmarkScore?.passmarkscore && (
+          <p>🔥 PassMark: {part.benchmarkScore.passmarkscore}</p>
+        )}
+        {part.benchmarkScore?.cinebenchSingle && (
+          <p>🎯 Cinebench Single: {part.benchmarkScore.cinebenchSingle}</p>
+        )}
+        {part.benchmarkScore?.cinebenchMulti && (
+          <p>💪 Cinebench Multi: {part.benchmarkScore.cinebenchMulti}</p>
+        )}
+        {part.reason && <p className="mt-2 text-sm italic text-gray-700">📝 {part.reason}</p>}
+      </div>
+    );
+  };
 
   return (
     <div className="p-4 max-w-4xl mx-auto">
@@ -64,9 +75,9 @@ const Recommend = () => {
       {results && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
           {renderPart("CPU", results.cpu)}
-          {renderPart("GPU", results.gpu || { name: "정보 없음" })}
-          {renderPart("메모리", results.memory || { name: "정보 없음" })}
-          {renderPart("메인보드", results.mainboard || { name: "정보 없음" })}
+          {renderPart("GPU", results.gpu)}
+          {renderPart("메모리", results.memory)}
+          {renderPart("메인보드", results.mainboard)}
           <div className="col-span-full border-t pt-4">
             <p className="text-lg font-semibold">💰 총합: {results.totalPrice?.toLocaleString()}원</p>
           </div>

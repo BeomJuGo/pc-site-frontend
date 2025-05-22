@@ -17,7 +17,7 @@ const PartCard = ({ part, label }) => {
   return (
     <div
       className="cursor-pointer border p-4 rounded shadow bg-white hover:shadow-lg transition"
-      onClick={() => navigate(`/detail/${category}/${encodeURIComponent(part.name)}`)}
+      onClick={() => navigate(`/detail/${part.category}/${part._id}`)}
     >
       <h2 className="text-lg font-semibold mb-1">🔧 {label}: {part.name}</h2>
       {part.image && <img src={part.image} alt={part.name} className="w-32 my-2" />}

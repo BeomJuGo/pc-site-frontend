@@ -1,4 +1,3 @@
-// ✅ src/pages/Recommend.js
 import React, { useState } from "react";
 import axios from "axios";
 import PartCard from "../components/PartCard";
@@ -14,7 +13,7 @@ const Recommend = () => {
 
     try {
       const res = await axios.post("https://pc-site-backend.onrender.com/api/recommend", {
-        budget: Number(budget),
+        budget: Number(budget), // 예산을 100,000 단위로 곱하지 않음
       });
       setResults(res.data.recommended);
     } catch (err) {
@@ -32,6 +31,7 @@ const Recommend = () => {
       <div className="flex flex-col gap-2 mb-6">
         <input
           type="number"
+          step="100000" // 🔁 화살표 클릭 시 100,000원씩 증가/감소
           className="border p-2 rounded"
           placeholder="예산 입력 (예: 1000000)"
           value={budget}
@@ -51,7 +51,7 @@ const Recommend = () => {
           <PartCard label="GPU" part={{ ...results.gpu, category: "gpu", _id: results.gpu._id }} />
           <PartCard label="메모리" part={{ ...results.memory, category: "memory", _id: results.memory._id }} />
           <PartCard label="메인보드" part={{ ...results.mainboard, category: "mainboard", _id: results.mainboard._id }} />
-          
+
           <div className="col-span-full border-t pt-4">
             <p className="text-lg font-semibold">
               💰 총합: {results.totalPrice?.toLocaleString()}원

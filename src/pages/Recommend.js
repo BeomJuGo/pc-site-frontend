@@ -1,4 +1,4 @@
-// ✅ src/pages/recommend.js
+// ✅ src/pages/Recommend.js
 import React, { useState } from "react";
 import axios from "axios";
 import PartCard from "../components/PartCard";
@@ -47,12 +47,15 @@ const Recommend = () => {
 
       {results && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-          <PartCard label="CPU" part={results.cpu} />
-          <PartCard label="GPU" part={results.gpu} />
-          <PartCard label="메모리" part={results.memory} />
-          <PartCard label="메인보드" part={results.mainboard} />
+          <PartCard label="CPU" part={{ ...results.cpu, category: "cpu", _id: results.cpu._id }} />
+          <PartCard label="GPU" part={{ ...results.gpu, category: "gpu", _id: results.gpu._id }} />
+          <PartCard label="메모리" part={{ ...results.memory, category: "memory", _id: results.memory._id }} />
+          <PartCard label="메인보드" part={{ ...results.mainboard, category: "mainboard", _id: results.mainboard._id }} />
+          
           <div className="col-span-full border-t pt-4">
-            <p className="text-lg font-semibold">💰 총합: {results.totalPrice?.toLocaleString()}원</p>
+            <p className="text-lg font-semibold">
+              💰 총합: {results.totalPrice?.toLocaleString()}원
+            </p>
           </div>
         </div>
       )}

@@ -7,7 +7,7 @@ export const cleanName = (raw) => raw.split("\n")[0].split("(")[0].trim();
 // ✅ 부품 목록 불러오기
 export const fetchParts = async (category) => {
   try {
-    const res = await fetch(`${BASE_URL}/api/parts/${category}`);
+    const res = await fetch(`${BASE_URL}/api/parts?category=${category}`);
     const data = await res.json();
     return data.map((part, i) => ({ id: i + 1, ...part }));
   } catch (err) {
@@ -15,6 +15,7 @@ export const fetchParts = async (category) => {
     return [];
   }
 };
+
 
 // ✅ 상세 정보
 export const fetchPartDetail = async (category, name) => {

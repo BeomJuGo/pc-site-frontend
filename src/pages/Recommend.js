@@ -1,9 +1,11 @@
+// ✅ src/pages/Recommend.js
 import React, { useState } from "react";
 import axios from "axios";
 import PartCard from "../components/PartCard";
 
 const Recommend = () => {
-  const [budget, setBudget] = useState("");
+  const [budget, setBudget] = useState(1000000);
+  const [purpose, setPurpose] = useState("작업용");
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -13,7 +15,8 @@ const Recommend = () => {
 
     try {
       const res = await axios.post("https://pc-site-backend.onrender.com/api/recommend", {
-        budget: Number(budget), // 예산을 100,000 단위로 곱하지 않음
+        budget: Number(budget),
+        purpose
       });
       setResults(res.data.recommended);
     } catch (err) {
@@ -31,12 +34,23 @@ const Recommend = () => {
       <div className="flex flex-col gap-2 mb-6">
         <input
           type="number"
-          step="100000" // 🔁 화살표 클릭 시 100,000원씩 증가/감소
           className="border p-2 rounded"
           placeholder="예산 입력 (예: 1000000)"
           value={budget}
           onChange={(e) => setBudget(e.target.value)}
+          step={100000}
         />
+
+        <select
+          className="border p-2 rounded"
+          value={purpose}
+          onChange={(e) => setPurpose(e.target.value)}
+        >
+          <option value="작업용">작업용</option>
+          <option value="문서용">문서용</option>
+          <option value="게임용">게임용</option>
+        </select>
+
         <button
           onClick={handleRecommend}
           className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
@@ -47,15 +61,12 @@ const Recommend = () => {
 
       {results && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-          <PartCard label="CPU" part={{ ...results.cpu, category: "cpu", _id: results.cpu._id }} />
-          <PartCard label="GPU" part={{ ...results.gpu, category: "gpu", _id: results.gpu._id }} />
-          <PartCard label="메모리" part={{ ...results.memory, category: "memory", _id: results.memory._id }} />
-          <PartCard label="메인보드" part={{ ...results.mainboard, category: "mainboard", _id: results.mainboard._id }} />
-
+          <PartCard label="CPU" part={results.cpu} />
+          <PartCard label="GPU" part={results.gpu} />
+          <PartCard label="메모리" part={results.memory} />
+          <PartCard label="메인보드" part={results.mainboard} />
           <div className="col-span-full border-t pt-4">
-            <p className="text-lg font-semibold">
-              💰 총합: {results.totalPrice?.toLocaleString()}원
-            </p>
+            <p className="text-lg font-semibold">💰 총합: {results.totalPrice?.toLocaleString()}원</p>
           </div>
         </div>
       )}

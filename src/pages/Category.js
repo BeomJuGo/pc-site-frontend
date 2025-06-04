@@ -24,10 +24,13 @@ const Category = () => {
     loadData();
   }, [category]);
 
-  // 페이지 초기화: 검색어, 정렬, 브랜드 필터 바뀌면 페이지 1로
   useEffect(() => {
     setCurrentPage(1);
   }, [search, sortBy, brandFilter]);
+
+  // 브랜드 필터 옵션: GPU는 nvidia/amd, 나머지는 intel/amd
+  const brandOptions =
+    category === "gpu" ? ["all", "nvidia", "amd"] : ["all", "intel", "amd"];
 
   const filtered = parts
     .filter((part) => {
@@ -35,7 +38,8 @@ const Category = () => {
       const brandMatch =
         brandFilter === "all" ||
         (brandFilter === "intel" && part.name.toLowerCase().includes("intel")) ||
-        (brandFilter === "amd" && part.name.toLowerCase().includes("amd"));
+        (brandFilter === "amd" && part.name.toLowerCase().includes("amd")) ||
+        (brandFilter === "nvidia" && part.name.toLowerCase().includes("nvidia"));
       return nameMatch && brandMatch;
     })
     .sort((a, b) => {
@@ -52,7 +56,6 @@ const Category = () => {
       return a.name.localeCompare(b.name);
     });
 
-  // 페이지네이션 처리
   const startIdx = (currentPage - 1) * itemsPerPage;
   const paginated = filtered.slice(startIdx, startIdx + itemsPerPage);
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
@@ -90,8 +93,9 @@ const Category = () => {
           <option value="name">🔤 이름순</option>
         </select>
 
+        {/* 브랜드 필터 버튼 */}
         <div className="flex gap-2">
-          {["all", "intel", "amd"].map((brand) => (
+          {brandOptions.map((brand) => (
             <button
               key={brand}
               onClick={() => setBrandFilter(brand)}
@@ -159,7 +163,7 @@ const Category = () => {
         ))}
       </div>
 
-      {/* 📄 페이지네이션 버튼 */}
+      {/* 📄 페이지네이션 */}
       <div className="flex justify-center mt-8 gap-2">
         <button
           disabled={currentPage === 1}

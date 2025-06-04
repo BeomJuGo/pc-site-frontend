@@ -139,22 +139,32 @@ const Category = () => {
                 : `${Number(part.price).toLocaleString()}원`}
             </p>
 
-            <ul className="text-sm ml-4 list-disc text-gray-600 mt-1">
-              <li>
-                PassMark:{" "}
-                {part.benchmarkScore.passmarkscore != null
-                  ? part.benchmarkScore.passmarkscore.toLocaleString()
+            {/* ✅ 점수 영역: GPU는 3DMark만, 그 외는 PassMark + Cinebench */}
+            {category === "gpu" ? (
+              <p className="text-sm text-gray-600 mt-1">
+                🧪 3DMark:{" "}
+                {part.benchmarkScore?.["3dmarkscore"] != null
+                  ? part.benchmarkScore["3dmarkscore"].toLocaleString()
                   : "정보 없음"}
-              </li>
-              <li>
-                Cinebench Single:{" "}
-                {part.benchmarkScore.cinebenchSingle || "정보 없음"}
-              </li>
-              <li>
-                Cinebench Multi:{" "}
-                {part.benchmarkScore.cinebenchMulti || "정보 없음"}
-              </li>
-            </ul>
+              </p>
+            ) : (
+              <ul className="text-sm ml-4 list-disc text-gray-600 mt-1">
+                <li>
+                  PassMark:{" "}
+                  {part.benchmarkScore?.passmarkscore != null
+                    ? part.benchmarkScore.passmarkscore.toLocaleString()
+                    : "정보 없음"}
+                </li>
+                <li>
+                  Cinebench Single:{" "}
+                  {part.benchmarkScore?.cinebenchSingle ?? "정보 없음"}
+                </li>
+                <li>
+                  Cinebench Multi:{" "}
+                  {part.benchmarkScore?.cinebenchMulti ?? "정보 없음"}
+                </li>
+              </ul>
+            )}
 
             <p className="text-blue-600 mt-2 italic text-sm">
               💬 {part.review || "리뷰 없음"}

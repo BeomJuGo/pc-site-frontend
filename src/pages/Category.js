@@ -1,4 +1,4 @@
-// src/pages/Category.js
+// ✅ src/pages/Category.js
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchFullPartData } from "../utils/api";
@@ -24,6 +24,7 @@ const Category = () => {
     loadData();
   }, [category]);
 
+  // 페이지 초기화: 검색어, 정렬, 브랜드 필터 바뀌면 페이지 1로
   useEffect(() => {
     setCurrentPage(1);
   }, [search, sortBy, brandFilter]);
@@ -51,6 +52,7 @@ const Category = () => {
       return a.name.localeCompare(b.name);
     });
 
+  // 페이지네이션 처리
   const startIdx = (currentPage - 1) * itemsPerPage;
   const paginated = filtered.slice(startIdx, startIdx + itemsPerPage);
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
@@ -59,7 +61,7 @@ const Category = () => {
     <div className="p-4 sm:p-8">
       <h2 className="text-3xl font-bold mb-6">{category.toUpperCase()} 목록</h2>
 
-      {/* 검색 및 필터 */}
+      {/* 🔍 검색 및 필터 */}
       <div className="flex flex-wrap gap-4 mb-6 items-center">
         <button
           onClick={() => navigate("/")}
@@ -103,12 +105,12 @@ const Category = () => {
         </div>
       </div>
 
-      {/* 부품 카드 목록 */}
+      {/* 💻 부품 카드 목록 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {paginated.map((part) => (
           <div
-            key={part._id}
-            onClick={() => navigate(`/detail/${category}/id/${part._id}`)}
+            key={part.id}
+            onClick={() => navigate(`/detail/${category}/${encodeURIComponent(part.name)}`)}
             className="cursor-pointer p-5 border rounded-xl shadow bg-white hover:shadow-lg transition-all"
           >
             <div className="flex justify-between items-start mb-3">
@@ -136,17 +138,17 @@ const Category = () => {
             <ul className="text-sm ml-4 list-disc text-gray-600 mt-1">
               <li>
                 PassMark:{" "}
-                {part.benchmarkScore?.passmarkscore != null
+                {part.benchmarkScore.passmarkscore != null
                   ? part.benchmarkScore.passmarkscore.toLocaleString()
                   : "정보 없음"}
               </li>
               <li>
                 Cinebench Single:{" "}
-                {part.benchmarkScore?.cinebenchSingle || "정보 없음"}
+                {part.benchmarkScore.cinebenchSingle || "정보 없음"}
               </li>
               <li>
                 Cinebench Multi:{" "}
-                {part.benchmarkScore?.cinebenchMulti || "정보 없음"}
+                {part.benchmarkScore.cinebenchMulti || "정보 없음"}
               </li>
             </ul>
 
@@ -157,7 +159,7 @@ const Category = () => {
         ))}
       </div>
 
-      {/* 페이지네이션 */}
+      {/* 📄 페이지네이션 버튼 */}
       <div className="flex justify-center mt-8 gap-2">
         <button
           disabled={currentPage === 1}

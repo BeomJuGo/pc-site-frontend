@@ -1,7 +1,6 @@
-// ✅ src/pages/PartDetail.js
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { fetchPartDetail, fetchPriceHistory } from "../utils/api";
+import axios from "axios";
 import {
   LineChart,
   Line,
@@ -20,12 +19,21 @@ const Detail = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      const detail = await fetchPartDetail(category, decodeURIComponent(id));
-      const history = await fetchPriceHistory(decodeURIComponent(id));
-      setPart(detail);
-      setPriceHistory(history);
-      setLoading(false);
+      try {
+        // ID 기반 상세 API 호출
+        const resPart = await axios.get(`/api/parts/${category}/id/${id}`);
+        setPart(resPart.data);
+
+        // 가격 히스토리는 기존대로 id로 호출
+        const resHistory = await axios.get(`/api/price-history/${id}`);
+        setPriceHistory(resHistory.data || []);
+      } catch (error) {
+        setPart(null);
+      } finally {
+        setLoading(false);
+      }
     };
+
     loadData();
   }, [category, id]);
 

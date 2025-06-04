@@ -53,20 +53,24 @@ const Detail = () => {
 
         <div className="flex-1">
           <p className="mb-2">
-            💰 현재 가격:{" "}
-            {isNaN(Number(part.price))
-              ? "가격 정보 없음"
-              : `${Number(part.price).toLocaleString()}원`}
+            💰 현재 가격: {isNaN(Number(part.price)) ? "가격 정보 없음" : `${Number(part.price).toLocaleString()}원`}
           </p>
 
-          <div className="mb-2">
-            ⚙️ 벤치마크 점수:
-            <ul className="ml-5 list-disc text-sm">
-              <li>PassMark: {formatValue(part.benchmarkScore?.passmarkscore)}</li>
-              <li>Cinebench Single: {formatValue(part.benchmarkScore?.cinebenchSingle)}</li>
-              <li>Cinebench Multi: {formatValue(part.benchmarkScore?.cinebenchMulti)}</li>
-            </ul>
-          </div>
+          {/* ✅ 점수 표시: GPU는 3DMark만, 그 외는 기존 점수 */}
+          {category === "gpu" ? (
+            <p className="mb-2">
+              🧪 3DMark 점수: {formatValue(part.benchmarkScore?.["3dmarkscore"])}
+            </p>
+          ) : (
+            <div className="mb-2">
+              ⚙️ 벤치마크 점수:
+              <ul className="ml-5 list-disc text-sm">
+                <li>PassMark: {formatValue(part.benchmarkScore?.passmarkscore)}</li>
+                <li>Cinebench Single: {formatValue(part.benchmarkScore?.cinebenchSingle)}</li>
+                <li>Cinebench Multi: {formatValue(part.benchmarkScore?.cinebenchMulti)}</li>
+              </ul>
+            </div>
+          )}
 
           {part.specSummary && (
             <div className="mb-2">

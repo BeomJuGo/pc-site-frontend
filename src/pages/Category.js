@@ -28,7 +28,6 @@ const Category = () => {
     setCurrentPage(1);
   }, [search, sortBy, brandFilter]);
 
-  // 브랜드 필터 옵션: GPU는 nvidia/amd, 나머지는 intel/amd
   const brandOptions =
     category === "gpu" ? ["all", "nvidia", "amd"] : ["all", "intel", "amd"];
 
@@ -48,10 +47,13 @@ const Category = () => {
       const bS = b.benchmarkScore?.passmarkscore || 0;
       const aV = a.benchmarkScore?.cinebenchMulti / aP || 0;
       const bV = b.benchmarkScore?.cinebenchMulti / bP || 0;
+      const a3d = a.benchmarkScore?.["3dmarkscore"] || 0;
+      const b3d = b.benchmarkScore?.["3dmarkscore"] || 0;
 
       if (sortBy === "price") return aP - bP;
       if (sortBy === "price-desc") return bP - aP;
       if (sortBy === "score") return bS - aS;
+      if (sortBy === "3dmark") return b3d - a3d;
       if (sortBy === "value") return bV - aV;
       return a.name.localeCompare(b.name);
     });
@@ -64,7 +66,6 @@ const Category = () => {
     <div className="p-4 sm:p-8">
       <h2 className="text-3xl font-bold mb-6">{category.toUpperCase()} 목록</h2>
 
-      {/* 🔍 검색 및 필터 */}
       <div className="flex flex-wrap gap-4 mb-6 items-center">
         <button
           onClick={() => navigate("/")}
@@ -89,11 +90,14 @@ const Category = () => {
           <option value="value">💡 가성비순</option>
           <option value="price">💰 가격 낮은순</option>
           <option value="price-desc">💰 가격 높은순</option>
-          <option value="score">📊 PassMark 점수순</option>
+          {category === "gpu" ? (
+            <option value="3dmark">📊 3DMark 점수순</option>
+          ) : (
+            <option value="score">📊 PassMark 점수순</option>
+          )}
           <option value="name">🔤 이름순</option>
         </select>
 
-        {/* 브랜드 필터 버튼 */}
         <div className="flex gap-2">
           {brandOptions.map((brand) => (
             <button
@@ -109,12 +113,13 @@ const Category = () => {
         </div>
       </div>
 
-      {/* 💻 부품 카드 목록 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {paginated.map((part) => (
           <div
             key={part.id}
-            onClick={() => navigate(`/detail/${category}/${encodeURIComponent(part.name)}`)}
+            onClick={() =>
+              navigate(`/detail/${category}/${encodeURIComponent(part.name)}`)
+            }
             className="cursor-pointer p-5 border rounded-xl shadow bg-white hover:shadow-lg transition-all"
           >
             <div className="flex justify-between items-start mb-3">
@@ -133,35 +138,29 @@ const Category = () => {
             </div>
 
             <p className="text-gray-700">
-              💰 가격:{" "}
-              {isNaN(part.price)
+              💰 가격: {isNaN(part.price)
                 ? "가격 정보 없음"
                 : `${Number(part.price).toLocaleString()}원`}
             </p>
 
-            {/* ✅ 점수 영역: GPU는 3DMark만, 그 외는 PassMark + Cinebench */}
             {category === "gpu" ? (
               <p className="text-sm text-gray-600 mt-1">
-                🧪 3DMark:{" "}
-                {part.benchmarkScore?.["3dmarkscore"] != null
+                🧪 3DMark: {part.benchmarkScore?.["3dmarkscore"] != null
                   ? part.benchmarkScore["3dmarkscore"].toLocaleString()
                   : "정보 없음"}
               </p>
             ) : (
               <ul className="text-sm ml-4 list-disc text-gray-600 mt-1">
                 <li>
-                  PassMark:{" "}
-                  {part.benchmarkScore?.passmarkscore != null
+                  PassMark: {part.benchmarkScore?.passmarkscore != null
                     ? part.benchmarkScore.passmarkscore.toLocaleString()
                     : "정보 없음"}
                 </li>
                 <li>
-                  Cinebench Single:{" "}
-                  {part.benchmarkScore?.cinebenchSingle ?? "정보 없음"}
+                  Cinebench Single: {part.benchmarkScore?.cinebenchSingle ?? "정보 없음"}
                 </li>
                 <li>
-                  Cinebench Multi:{" "}
-                  {part.benchmarkScore?.cinebenchMulti ?? "정보 없음"}
+                  Cinebench Multi: {part.benchmarkScore?.cinebenchMulti ?? "정보 없음"}
                 </li>
               </ul>
             )}
@@ -173,7 +172,6 @@ const Category = () => {
         ))}
       </div>
 
-      {/* 📄 페이지네이션 */}
       <div className="flex justify-center mt-8 gap-2">
         <button
           disabled={currentPage === 1}

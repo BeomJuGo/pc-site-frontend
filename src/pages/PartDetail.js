@@ -1,4 +1,3 @@
-// ✅ src/pages/PartDetail.js
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { fetchPartDetail, fetchPriceHistory } from "../utils/api";
@@ -20,8 +19,8 @@ const Detail = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      const detail = await fetchPartDetail(category, decodeURIComponent(id));
-      const history = await fetchPriceHistory(decodeURIComponent(id));
+      const detail = await fetchPartDetail(category, id);
+      const history = await fetchPriceHistory(id);
       setPart(detail);
       setPriceHistory(history);
       setLoading(false);

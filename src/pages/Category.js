@@ -28,8 +28,12 @@ const Category = () => {
     setCurrentPage(1);
   }, [search, sortBy, brandFilter]);
 
-  const brandOptions =
-    category === "gpu" ? ["all", "nvidia", "amd"] : ["all", "intel", "amd"];
+const brandOptions =
+  category === "gpu"
+    ? ["all", "nvidia", "amd"]
+    : category === "cpu"
+    ? ["all", "intel", "amd"]
+    : ["all"];
 
   const filtered = parts
     .filter((part) => {

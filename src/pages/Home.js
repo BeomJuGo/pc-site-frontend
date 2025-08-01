@@ -25,13 +25,12 @@ const Home = () => {
           </Link>
 
           <Link
-            to="/category/mainboard"
-            className="flex flex-col items-center justify-center bg-white rounded-xl shadow-md hover:shadow-lg p-6 transition-all hover:-translate-y-1"
-          >
-            <div className="text-4xl mb-4">🔧</div>
-            <div className="text-lg font-semibold">메인보드</div>
-          </Link>
-
+  to="/category/motherboard"  // ✅ 수정: mainboard → motherboard
+  className="flex flex-col items-center justify-center bg-white rounded-xl shadow-md hover:shadow-lg p-6 transition-all hover:-translate-y-1"
+>
+  <div className="text-4xl mb-4"></div>
+  <div className="text-lg font-semibold">메인보드</div>
+</Link>
           <Link
             to="/category/memory"
             className="flex flex-col items-center justify-center bg-white rounded-xl shadow-md hover:shadow-lg p-6 transition-all hover:-translate-y-1"

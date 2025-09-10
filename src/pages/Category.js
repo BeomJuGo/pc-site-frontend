@@ -49,16 +49,14 @@ export default function Category() {
       return nameMatch && brandMatch;
     })
     .sort((a, b) => {
-      const aP = Number(a.price) || 0,
-        bP = Number(b.price) || 0;
+      const aP = Number(a.price) || 0;
+      const bP = Number(b.price) || 0;
       const aS = Number(a.benchmarkScore?.passmarkscore) || 0;
       const bS = Number(b.benchmarkScore?.passmarkscore) || 0;
       const a3d = Number(a.benchmarkScore?.["3dmarkscore"]) || 0;
       const b3d = Number(b.benchmarkScore?.["3dmarkscore"]) || 0;
-      const aV =
-        aP > 0 ? (Number(a.benchmarkScore?.cinebenchMulti) || 0) / aP : 0;
-      const bV =
-        bP > 0 ? (Number(b.benchmarkScore?.cinebenchMulti) || 0) / bP : 0;
+      const aV = aP > 0 ? (Number(a.benchmarkScore?.cinebenchMulti) || 0) / aP : 0;
+      const bV = bP > 0 ? (Number(b.benchmarkScore?.cinebenchMulti) || 0) / bP : 0;
 
       if (sortBy === "price") return aP - bP;
       if (sortBy === "price-desc") return bP - aP;
@@ -72,24 +70,16 @@ export default function Category() {
   const pageItems = filtered.slice(startIdx, startIdx + itemsPerPage);
   const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage));
 
-  if (loading)
-    return (
-      <div className="p-8 text-center text-slate-500">⏳ 로딩 중...</div>
-    );
+  if (loading) return <div className="p-8 text-center text-slate-500">로딩 중...</div>;
 
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-6">
-      <div className="flex items-center justify-between mb-5">
-        <h2 className="text-2xl font-bold text-slate-900">
-          {category.toUpperCase()}
-        </h2>
-        <div className="text-sm text-slate-500">
-          총 {filtered.length.toLocaleString()}개
-        </div>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-2xl font-bold text-slate-900">{category.toUpperCase()}</h2>
+        <div className="text-sm text-slate-500">총 {filtered.length.toLocaleString()}개</div>
       </div>
 
-      {/* 상단 유틸 바 */}
-      <div className="flex flex-wrap gap-3 items-center mb-6">
+      <div className="flex flex-wrap gap-3 items-center mb-4">
         <input
           type="text"
           placeholder="제품명 검색"
@@ -97,7 +87,6 @@ export default function Category() {
           onChange={(e) => setSearch(e.target.value)}
           className="border border-slate-300 rounded-lg px-3 py-2 text-[14px] w-64"
         />
-
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
@@ -113,19 +102,16 @@ export default function Category() {
           )}
           <option value="name">이름순</option>
         </select>
-
         <div className="flex gap-1">
           {brandOptions.map((brand) => (
             <button
               key={brand}
               onClick={() => setBrandFilter(brand)}
               className={[
-                "px-3 py-2",
-                "rounded-lg border",
+                "px-3 py-2 rounded-lg border text-[13px]",
                 brandFilter === brand
                   ? "border-slate-800 text-slate-900"
                   : "border-slate-300 text-slate-600 hover:border-slate-400",
-                "text-[13px]",
               ].join(" ")}
             >
               {brand === "all" ? "전체" : brand.toUpperCase()}
@@ -134,20 +120,16 @@ export default function Category() {
         </div>
       </div>
 
-      {/* 리스트형 카드 영역 */}
-      <div className="flex flex-col gap-3">
+      <div className="divide-y divide-slate-200 border rounded-lg bg-white">
         {pageItems.map((part) => (
           <PartCard
             key={part.id || part._id || part.name}
             part={part}
-            onClick={() =>
-              navigate(`/detail/${category}/${encodeURIComponent(part.name)}`)
-            }
+            onClick={() => navigate(`/detail/${category}/${encodeURIComponent(part.name)}`)}
           />
         ))}
       </div>
 
-      {/* 페이지네이션 */}
       <div className="flex justify-center mt-8 gap-2">
         <button
           disabled={currentPage === 1}

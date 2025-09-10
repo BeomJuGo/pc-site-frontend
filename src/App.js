@@ -1,21 +1,28 @@
-// ✅ App.js - 라우팅 구성 파일
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Category from "./pages/Category";
-import Detail from "./pages/PartDetail";
+import PartDetail from "./pages/PartDetail";
 import Recommend from "./pages/Recommend";
 
-const App = () => {
+export default function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/category/:category" element={<Category />} />
-        <Route path="/detail/:category/:id" element={<Detail />} /> {/* ✅ 수정된 라우팅 */}
-        <Route path="/ai-recommend" element={<Recommend />} />
-      </Routes>
+      <div className="min-h-screen flex flex-col bg-slate-50">
+        <Header />
+        <main className="flex-1">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/category/:category" element={<Category />} />
+            <Route path="/detail/:category/:slug" element={<PartDetail />} />
+            <Route path="/ai-recommend" element={<Recommend />} />
+            {/* 과거 경로 호환 */}
+            <Route path="/recommended" element={<Navigate to="/ai-recommend" replace />} />
+          </Routes>
+        </main>
+        <Footer />
+      </div>
     </Router>
   );
-};
-
-export default App;
+}

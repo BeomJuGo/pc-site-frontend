@@ -1,48 +1,51 @@
-// ✅ src/pages/Recommend.js
 import React, { useState } from "react";
 import axios from "axios";
 import PartCard from "../components/PartCard";
+import { useNavigate } from "react-router-dom";
 
-const Recommend = () => {
+export default function Recommend() {
   const [budget, setBudget] = useState(1000000);
   const [purpose, setPurpose] = useState("작업용");
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleRecommend = async () => {
     if (!budget) return alert("예산을 입력해주세요!");
     setLoading(true);
-
     try {
-      const res = await axios.post("https://pc-site-backend.onrender.com/api/recommend", {
-        budget: Number(budget),
-        purpose
-      });
+      const res = await axios.post(
+        "https://pc-site-backend.onrender.com/api/recommend",
+        { budget: Number(budget), purpose }
+      );
       setResults(res.data.recommended);
-    } catch (err) {
+    } catch (e) {
       alert("추천 실패 😢");
-      console.error(err);
+      console.error(e);
     }
-
     setLoading(false);
   };
 
   return (
-    <div className="p-4 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">💡 AI 기반 PC 견적 추천</h1>
+    <div className="px-4 sm:px-6 lg:px-8 py-6 max-w-3xl mx-auto">
+      <h1 className="text-2xl font-bold text-slate-900 mb-4">
+        AI 기반 견적 추천
+      </h1>
 
-      <div className="flex flex-col gap-2 mb-6">
+      {/* 입력 블록: 시각만 정리 */}
+      <div className="flex flex-wrap items-center gap-3 mb-6">
+        <label className="text-sm text-slate-600">예산</label>
         <input
           type="number"
-          className="border p-2 rounded"
-          placeholder="예산 입력 (예: 1000000)"
+          className="border border-slate-300 rounded-lg px-3 py-2 text-[14px] w-40"
+          placeholder="예: 1000000"
           value={budget}
           onChange={(e) => setBudget(e.target.value)}
           step={100000}
         />
-
+        <label className="text-sm text-slate-600">용도</label>
         <select
-          className="border p-2 rounded"
+          className="border border-slate-300 rounded-lg px-3 py-2 text-[14px]"
           value={purpose}
           onChange={(e) => setPurpose(e.target.value)}
         >
@@ -50,28 +53,60 @@ const Recommend = () => {
           <option value="문서용">문서용</option>
           <option value="게임용">게임용</option>
         </select>
-
         <button
           onClick={handleRecommend}
-          className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
+          className="bg-slate-900 text-white rounded-lg px-4 py-2 text-sm"
         >
           {loading ? "추천 중..." : "추천 받기"}
         </button>
       </div>
 
+      {/* 결과 리스트: 리스트형 카드 재사용 */}
       {results && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-          <PartCard label="CPU" part={results.cpu} />
-          <PartCard label="GPU" part={results.gpu} />
-          <PartCard label="메모리" part={results.memory} />
-          <PartCard label="메인보드" part={results.mainboard} />
-          <div className="col-span-full border-t pt-4">
-            <p className="text-lg font-semibold">💰 총합: {results.totalPrice?.toLocaleString()}원</p>
+        <div className="flex flex-col gap-3">
+          <PartCard
+            compact
+            part={results.cpu}
+            onClick={() =>
+              results.cpu &&
+              navigate(`/detail/${results.cpu.category || "cpu"}/${encodeURIComponent(results.cpu.name)}`)
+            }
+          />
+          <PartCard
+            compact
+            part={results.gpu}
+            onClick={() =>
+              results.gpu &&
+              navigate(`/detail/${results.gpu.category || "gpu"}/${encodeURIComponent(results.gpu.name)}`)
+            }
+          />
+          <PartCard
+            compact
+            part={results.memory}
+            onClick={() =>
+              results.memory &&
+              navigate(`/detail/${results.memory.category || "memory"}/${encodeURIComponent(results.memory.name)}`)
+            }
+          />
+          <PartCard
+            compact
+            part={results.mainboard || results.motherboard}
+            onClick={() => {
+              const mb = results.mainboard || results.motherboard;
+              if (mb)
+                navigate(
+                  `/detail/${mb.category || "motherboard"}/${encodeURIComponent(mb.name)}`
+                );
+            }}
+          />
+
+          <div className="pt-2 text-right text-[15px] font-semibold text-slate-900">
+            총합:{" "}
+            {Number(results.totalPrice || 0).toLocaleString()}
+            원
           </div>
         </div>
       )}
     </div>
   );
-};
-
-export default Recommend;
+}

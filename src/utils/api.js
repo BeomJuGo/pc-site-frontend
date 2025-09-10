@@ -1,58 +1,58 @@
-// ✅ src/utils/api.js
 const BASE_URL = "https://pc-site-backend.onrender.com";
 
-// ✅ 이름 정제 함수 (줄바꿈 제거 + 괄호 제거)
-export const cleanName = (raw) => raw.split("\n")[0].split("(")[0].trim();
+// 이름 정제 + slug 생성
+export const cleanName = (raw) => raw?.split("\n")[0].split("(")[0].trim();
+export const nameToSlug = (name) => encodeURIComponent(cleanName(name || ""));
 
-// ✅ 부품 목록 불러오기
+// 부품 목록
 export const fetchParts = async (category) => {
   try {
     const res = await fetch(`${BASE_URL}/api/parts?category=${category}`);
     const data = await res.json();
     return data.map((part, i) => ({ id: i + 1, ...part }));
-  } catch (err) {
-    console.error("❌ [fetchParts] 부품 목록 오류:", err);
+  } catch (e) {
+    console.error("[fetchParts] error:", e);
     return [];
   }
 };
 
-
-// ✅ 상세 정보
-export const fetchPartDetail = async (category, name) => {
+// 상세
+export const fetchPartDetail = async (category, slugOrName) => {
   try {
     const res = await fetch(
-      `${BASE_URL}/api/parts/${category}/${encodeURIComponent(cleanName(name))}`
+      `${BASE_URL}/api/parts/${category}/${nameToSlug(slugOrName)}`
     );
     return await res.json();
-  } catch (err) {
-    console.error("❌ [fetchPartDetail] 상세 정보 오류:", err);
+  } catch (e) {
+    console.error("[fetchPartDetail] error:", e);
     return null;
   }
 };
 
-// ✅ 가격 히스토리
-export const fetchPriceHistory = async (category, name) => {
+// 가격 히스토리
+export const fetchPriceHistory = async (category, slugOrName) => {
   try {
     const res = await fetch(
-      `${BASE_URL}/api/parts/${category}/${encodeURIComponent(cleanName(name))}/history`
+      `${BASE_URL}/api/parts/${category}/${nameToSlug(slugOrName)}/history`
     );
     const data = await res.json();
     return data.priceHistory || [];
-  } catch (err) {
-    console.error("❌ [fetchPriceHistory] 가격 히스토리 오류:", err);
+  } catch (e) {
+    console.error("[fetchPriceHistory] error:", e);
     return [];
   }
 };
 
-// ✅ 전체 부품 정보 (카드 렌더용)
+// 카드 렌더용 기본값 보강
 export const fetchFullPartData = async (category) => {
   const parts = await fetchParts(category);
-  return parts.map((part) => ({
-    ...part,
-    benchmarkScore: part.benchmarkScore ?? {
-      passmarkscore: "정보 없음",
-      cinebenchSingle: "정보 없음",
-      cinebenchMulti: "정보 없음",
+  return parts.map((p) => ({
+    ...p,
+    benchmarkScore: p.benchmarkScore ?? {
+      passmarkscore: null,
+      cinebenchSingle: null,
+      cinebenchMulti: null,
+      "3dmarkscore": null,
     },
   }));
 };

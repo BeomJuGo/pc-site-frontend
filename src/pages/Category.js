@@ -12,6 +12,7 @@ export default function Category() {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("value");
   const [brandFilter, setBrandFilter] = useState("all");
+  const [chipsetFilter, setChipsetFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
@@ -27,14 +28,27 @@ export default function Category() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, sortBy, brandFilter]);
+  }, [search, sortBy, brandFilter, chipsetFilter]);
+
+  useEffect(() => {
+    setChipsetFilter("all");
+  }, [brandFilter]);
 
   const brandOptions =
     category === "gpu"
       ? ["all", "nvidia", "amd"]
       : category === "cpu"
       ? ["all", "intel", "amd"]
+      : category === "motherboard"
+      ? ["all", "amd", "intel"]
       : ["all"];
+
+  const chipsetMap = {
+    amd: ["a620", "b650", "b750", "x670", "x770"],
+    intel: ["h610", "h710", "b760", "b860", "z790", "z890"],
+  };
+  const chipsetOptions =
+    category === "motherboard" ? chipsetMap[brandFilter] || [] : [];
 
   const filtered = parts
     .filter((p) => {
@@ -43,10 +57,15 @@ export default function Category() {
       const nameMatch = nm.includes(s);
       const brandMatch =
         brandFilter === "all" ||
-        (brandFilter === "intel" && nm.includes("intel")) ||
-        (brandFilter === "amd" && nm.includes("amd")) ||
-        (brandFilter === "nvidia" && nm.includes("nvidia"));
-      return nameMatch && brandMatch;
+        ((category === "cpu" || category === "gpu") &&
+          nm.includes(brandFilter)) ||
+        (category === "motherboard" &&
+          (chipsetMap[brandFilter] || []).some((cs) => nm.includes(cs)));
+      const chipsetMatch =
+        category !== "motherboard" ||
+        chipsetFilter === "all" ||
+        nm.includes(chipsetFilter);
+      return nameMatch && brandMatch && chipsetMatch;
     })
     .sort((a, b) => {
       const aP = Number(a.price) || 0;
@@ -118,6 +137,24 @@ export default function Category() {
             </button>
           ))}
         </div>
+        {category === "motherboard" && brandFilter !== "all" && (
+          <div className="flex gap-1 mt-1">
+            {chipsetOptions.map((cs) => (
+              <button
+                key={cs}
+                onClick={() => setChipsetFilter(cs)}
+                className={[
+                  "px-3 py-2 rounded-lg border text-[13px]",
+                  chipsetFilter === cs
+                    ? "border-slate-800 text-slate-900"
+                    : "border-slate-300 text-slate-600 hover:border-slate-400",
+                ].join(" ")}
+              >
+                {cs.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="divide-y divide-slate-200 border rounded-lg bg-white">

@@ -1,10 +1,8 @@
 const BASE_URL = "https://pc-site-backend.onrender.com";
 
-// 이름 정제 + slug 생성
 export const cleanName = (raw) => raw?.split("\n")[0].split("(")[0].trim();
 export const nameToSlug = (name) => encodeURIComponent(cleanName(name || ""));
 
-// 부품 목록
 export const fetchParts = async (category) => {
   try {
     const res = await fetch(`${BASE_URL}/api/parts?category=${category}`);
@@ -16,12 +14,9 @@ export const fetchParts = async (category) => {
   }
 };
 
-// 상세
 export const fetchPartDetail = async (category, slugOrName) => {
   try {
-    const res = await fetch(
-      `${BASE_URL}/api/parts/${category}/${nameToSlug(slugOrName)}`
-    );
+    const res = await fetch(`${BASE_URL}/api/parts/${category}/${nameToSlug(slugOrName)}`);
     return await res.json();
   } catch (e) {
     console.error("[fetchPartDetail] error:", e);
@@ -29,12 +24,9 @@ export const fetchPartDetail = async (category, slugOrName) => {
   }
 };
 
-// 가격 히스토리
 export const fetchPriceHistory = async (category, slugOrName) => {
   try {
-    const res = await fetch(
-      `${BASE_URL}/api/parts/${category}/${nameToSlug(slugOrName)}/history`
-    );
+    const res = await fetch(`${BASE_URL}/api/parts/${category}/${nameToSlug(slugOrName)}/history`);
     const data = await res.json();
     return data.priceHistory || [];
   } catch (e) {
@@ -43,7 +35,6 @@ export const fetchPriceHistory = async (category, slugOrName) => {
   }
 };
 
-// 카드 렌더용 기본값 보강
 export const fetchFullPartData = async (category) => {
   const parts = await fetchParts(category);
   return parts.map((p) => ({

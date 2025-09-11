@@ -19,21 +19,11 @@ export default function Etc() {
                 : "border-slate-300 text-slate-600 hover:border-slate-400",
             ].join(" ")}
           >
-            {opt === "all"
-              ? "전체"
-              : opt === "monitor"
-              ? "모니터"
-              : opt === "keyboard"
-              ? "키보드"
-              : opt === "mouse"
-              ? "마우스"
-              : "스피커"}
+            {opt === "all" ? "전체" : opt === "monitor" ? "모니터" : opt === "keyboard" ? "키보드" : opt === "mouse" ? "마우스" : "스피커"}
           </button>
         ))}
       </div>
-      <div className="text-slate-500 text-sm">
-        아직 데이터가 준비되지 않았습니다.
-      </div>
+      <div className="text-slate-500 text-sm">아직 데이터가 준비되지 않았습니다.</div>
     </div>
   );
 }

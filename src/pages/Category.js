@@ -3,6 +3,14 @@ import { useParams, useNavigate } from "react-router-dom";
 import { fetchFullPartData } from "../utils/api";
 import PartCard from "../components/PartCard";
 
+const num = (v) => {
+  if (v == null) return 0;
+  if (typeof v === "number" && Number.isFinite(v)) return v;
+  const s = String(v).replace(/[^\d.-]/g, "");
+  const n = Number(s);
+  return Number.isFinite(n) ? n : 0;
+};
+
 export default function Category() {
   const { category } = useParams();
   const navigate = useNavigate();
@@ -39,13 +47,13 @@ export default function Category() {
   const perfScore = (p) => {
     const bm = p?.benchmarkScore || {};
     if (category === "gpu") {
-      const s = Number(bm["3dmarkscore"]) || Number(bm.passmarkscore) || 0;
-      return s;
+      const s = num(bm["3dmarkscore"]);
+      return s > 0 ? s : num(bm.passmarkscore);
     } else if (category === "cpu") {
-      const s = Number(bm.cinebenchMulti) || Number(bm.passmarkscore) || 0;
-      return s;
+      const s = num(bm.cinebenchMulti);
+      return s > 0 ? s : num(bm.passmarkscore);
     }
-    return Number(bm.passmarkscore) || 0;
+    return num(bm.passmarkscore);
   };
 
   const filtered = useMemo(() => {
@@ -62,12 +70,12 @@ export default function Category() {
         return nameMatch && brandMatch;
       })
       .sort((a, b) => {
-        const aP = Number(a.price) || 0;
-        const bP = Number(b.price) || 0;
+        const aP = num(a.price);
+        const bP = num(b.price);
         const aS = perfScore(a);
         const bS = perfScore(b);
-        const a3d = Number(a.benchmarkScore?.["3dmarkscore"]) || 0;
-        const b3d = Number(b.benchmarkScore?.["3dmarkscore"]) || 0;
+        const a3d = num(a.benchmarkScore?.["3dmarkscore"]);
+        const b3d = num(b.benchmarkScore?.["3dmarkscore"]);
         const aV = aP > 0 ? aS / aP : 0;
         const bV = bP > 0 ? bS / bP : 0;
 
@@ -75,7 +83,12 @@ export default function Category() {
         if (sortBy === "price-desc") return bP - aP;
         if (sortBy === "score") return bS - aS;
         if (sortBy === "3dmark") return b3d - a3d;
-        if (sortBy === "value") return bV - aV;
+        if (sortBy === "value") {
+          if (bV !== aV) return bV - aV;
+          if (bS !== aS) return bS - aS;
+          if (aP !== bP) return aP - bP;
+          return String(a.name).localeCompare(String(b.name));
+        }
         return String(a.name).localeCompare(String(b.name));
       });
   }, [parts, search, brandFilter, sortBy, category]);

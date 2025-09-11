@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Category from "./pages/Category";
 import PartDetail from "./pages/PartDetail";
 import Recommend from "./pages/Recommend";
+import Etc from "./pages/Etc";
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/category/:category" element={<Category />} />
             <Route path="/detail/:category/:slug" element={<PartDetail />} />
+            <Route path="/category/etc" element={<Etc />} />
             <Route path="/ai-recommend" element={<Recommend />} />
             <Route path="/recommended" element={<Navigate to="/ai-recommend" replace />} />
             <Route path="/cpu" element={<Navigate to="/category/cpu" replace />} />

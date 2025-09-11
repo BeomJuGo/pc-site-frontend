@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchFullPartData } from "../utils/api";
 import PartCard from "../components/PartCard";
@@ -12,7 +12,6 @@ export default function Category() {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("value");
   const [brandFilter, setBrandFilter] = useState("all");
-  const [chipsetFilter, setChipsetFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
@@ -28,62 +27,58 @@ export default function Category() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, sortBy, brandFilter, chipsetFilter]);
-
-  useEffect(() => {
-    setChipsetFilter("all");
-  }, [brandFilter]);
+  }, [search, sortBy, brandFilter]);
 
   const brandOptions =
     category === "gpu"
       ? ["all", "nvidia", "amd"]
       : category === "cpu"
       ? ["all", "intel", "amd"]
-      : category === "motherboard"
-      ? ["all", "amd", "intel"]
       : ["all"];
 
-  const chipsetMap = {
-    amd: ["a620", "b650", "b750", "x670", "x770"],
-    intel: ["h610", "h710", "b760", "b860", "z790", "z890"],
+  const perfScore = (p) => {
+    const bm = p?.benchmarkScore || {};
+    if (category === "gpu") {
+      const s = Number(bm["3dmarkscore"]) || Number(bm.passmarkscore) || 0;
+      return s;
+    } else if (category === "cpu") {
+      const s = Number(bm.cinebenchMulti) || Number(bm.passmarkscore) || 0;
+      return s;
+    }
+    return Number(bm.passmarkscore) || 0;
   };
-  const chipsetOptions =
-    category === "motherboard" ? chipsetMap[brandFilter] || [] : [];
 
-  const filtered = parts
-    .filter((p) => {
-      const nm = String(p.name || "").toLowerCase();
-      const s = search.toLowerCase();
-      const nameMatch = nm.includes(s);
-      const brandMatch =
-        brandFilter === "all" ||
-        ((category === "cpu" || category === "gpu") &&
-          nm.includes(brandFilter)) ||
-        (category === "motherboard" &&
-          (chipsetMap[brandFilter] || []).some((cs) => nm.includes(cs)));
-      const chipsetMatch =
-        category !== "motherboard" ||
-        chipsetFilter === "all" ||
-        nm.includes(chipsetFilter);
-      return nameMatch && brandMatch && chipsetMatch;
-    })
-    .sort((a, b) => {
-      const aP = Number(a.price) || 0;
-      const bP = Number(b.price) || 0;
-      const aS = Number(a.benchmarkScore?.passmarkscore) || 0;
-      const bS = Number(b.benchmarkScore?.passmarkscore) || 0;
-      const a3d = Number(a.benchmarkScore?.["3dmarkscore"]) || 0;
-      const b3d = Number(b.benchmarkScore?.["3dmarkscore"]) || 0;
-      const aV = aP > 0 ? (Number(a.benchmarkScore?.cinebenchMulti) || 0) / aP : 0;
-      const bV = bP > 0 ? (Number(b.benchmarkScore?.cinebenchMulti) || 0) / bP : 0;
+  const filtered = useMemo(() => {
+    const s = search.toLowerCase();
+    return parts
+      .filter((p) => {
+        const nm = String(p.name || "").toLowerCase();
+        const nameMatch = nm.includes(s);
+        const brandMatch =
+          brandFilter === "all" ||
+          (brandFilter === "intel" && nm.includes("intel")) ||
+          (brandFilter === "amd" && nm.includes("amd")) ||
+          (brandFilter === "nvidia" && nm.includes("nvidia"));
+        return nameMatch && brandMatch;
+      })
+      .sort((a, b) => {
+        const aP = Number(a.price) || 0;
+        const bP = Number(b.price) || 0;
+        const aS = perfScore(a);
+        const bS = perfScore(b);
+        const a3d = Number(a.benchmarkScore?.["3dmarkscore"]) || 0;
+        const b3d = Number(b.benchmarkScore?.["3dmarkscore"]) || 0;
+        const aV = aP > 0 ? aS / aP : 0;
+        const bV = bP > 0 ? bS / bP : 0;
 
-      if (sortBy === "price") return aP - bP;
-      if (sortBy === "price-desc") return bP - aP;
-      if (sortBy === "score") return bS - aS;
-      if (sortBy === "3dmark") return b3d - a3d;
-      if (sortBy === "value") return bV - aV;
-      return String(a.name).localeCompare(String(b.name));
-    });
+        if (sortBy === "price") return aP - bP;
+        if (sortBy === "price-desc") return bP - aP;
+        if (sortBy === "score") return bS - aS;
+        if (sortBy === "3dmark") return b3d - a3d;
+        if (sortBy === "value") return bV - aV;
+        return String(a.name).localeCompare(String(b.name));
+      });
+  }, [parts, search, brandFilter, sortBy, category]);
 
   const startIdx = (currentPage - 1) * itemsPerPage;
   const pageItems = filtered.slice(startIdx, startIdx + itemsPerPage);
@@ -98,7 +93,7 @@ export default function Category() {
         <div className="text-sm text-slate-500">총 {filtered.length.toLocaleString()}개</div>
       </div>
 
-      <div className="flex flex-wrap gap-3 items-center mb-4">
+      <div className="flex flex-wrap items-center gap-3 mb-4">
         <input
           type="text"
           placeholder="제품명 검색"
@@ -117,10 +112,11 @@ export default function Category() {
           {category === "gpu" ? (
             <option value="3dmark">3DMark 점수순</option>
           ) : (
-            <option value="score">PassMark 점수순</option>
+            <option value="score">PassMark/CB 점수순</option>
           )}
           <option value="name">이름순</option>
         </select>
+
         <div className="flex gap-1">
           {brandOptions.map((brand) => (
             <button
@@ -137,24 +133,6 @@ export default function Category() {
             </button>
           ))}
         </div>
-        {category === "motherboard" && brandFilter !== "all" && (
-          <div className="flex gap-1 mt-1">
-            {chipsetOptions.map((cs) => (
-              <button
-                key={cs}
-                onClick={() => setChipsetFilter(cs)}
-                className={[
-                  "px-3 py-2 rounded-lg border text-[13px]",
-                  chipsetFilter === cs
-                    ? "border-slate-800 text-slate-900"
-                    : "border-slate-300 text-slate-600 hover:border-slate-400",
-                ].join(" ")}
-              >
-                {cs.toUpperCase()}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
       <div className="divide-y divide-slate-200 border rounded-lg bg-white">

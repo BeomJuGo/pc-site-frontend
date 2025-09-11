@@ -14,6 +14,7 @@ export default function Header() {
           <NavLink to="/category/gpu" className={link}>GPU</NavLink>
           <NavLink to="/category/motherboard" className={link}>메인보드</NavLink>
           <NavLink to="/category/memory" className={link}>메모리</NavLink>
+          <NavLink to="/category/etc" className={link}>기타기기</NavLink>
           <NavLink to="/ai-recommend" className="ml-1 px-3 py-2 text-sm rounded-lg bg-slate-900 text-white">
             AI 추천
           </NavLink>

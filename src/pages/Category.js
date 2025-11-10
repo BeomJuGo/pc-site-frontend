@@ -62,24 +62,24 @@ export default function Category() {
         ? ["all", "intel", "amd"]
         : ["all"];
 
-  const perfScore = (p) => {
-    // 백엔드에서 직접 저장한 benchScore를 우선 사용
-    if ((category === "cpu" || category === "gpu") && p?.benchScore && num(p.benchScore) > 0) {
-      return num(p.benchScore);
-    }
-    
-    const bm = p?.benchmarkScore || {};
-    if (category === "gpu") {
-      const s = num(bm["3dmarkscore"]);
-      return s > 0 ? s : num(bm.passmarkscore);
-    } else if (category === "cpu") {
-      const s = num(bm.cinebenchMulti);
-      return s > 0 ? s : num(bm.passmarkscore);
-    }
-    return 0; // CPU/GPU 외에는 성능 점수 미사용
-  };
-
   const filtered = useMemo(() => {
+    const perfScore = (p) => {
+      // 백엔드에서 직접 저장한 benchScore를 우선 사용
+      if ((category === "cpu" || category === "gpu") && p?.benchScore && num(p.benchScore) > 0) {
+        return num(p.benchScore);
+      }
+      
+      const bm = p?.benchmarkScore || {};
+      if (category === "gpu") {
+        const s = num(bm["3dmarkscore"]);
+        return s > 0 ? s : num(bm.passmarkscore);
+      } else if (category === "cpu") {
+        const s = num(bm.cinebenchMulti);
+        return s > 0 ? s : num(bm.passmarkscore);
+      }
+      return 0; // CPU/GPU 외에는 성능 점수 미사용
+    };
+
     const s = search.toLowerCase();
     return parts
       .filter((p) => {

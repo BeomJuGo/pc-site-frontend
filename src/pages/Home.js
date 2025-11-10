@@ -5,11 +5,6 @@ import { useState, useEffect } from "react";
 
 export default function Home() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    setIsLoaded(true);
-  }, []);
 
   useEffect(() => {
     const handleMouseMove = (e) => {

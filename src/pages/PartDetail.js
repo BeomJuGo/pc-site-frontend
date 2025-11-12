@@ -46,8 +46,7 @@ export default function PartDetail() {
                 <span className="px-3 py-1.5 rounded-lg border border-slate-600 bg-slate-800/50 text-slate-200 backdrop-blur-sm font-medium">
                   PassMark {n(part?.benchScore || part?.benchmarkScore?.passmarkscore)}
                 </span>
-                <span className="px-3 py-1.5 rounded-lg border border-slate-600 bg-slate-800/50 text-slate-200 backdrop-blur-sm font-medium">CB Single {n(part?.benchmarkScore?.cinebenchSingle)}</span>
-                <span className="px-3 py-1.5 rounded-lg border border-slate-600 bg-slate-800/50 text-slate-200 backdrop-blur-sm font-medium">CB Multi {n(part?.benchmarkScore?.cinebenchMulti)}</span>
+              
               </>
             )}
           </div>

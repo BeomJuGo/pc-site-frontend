@@ -1,8 +1,10 @@
 // src/pages/Recommend.js (CORS 문제 해결 + 디버깅 강화 버전)
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import PartCard from "../components/PartCard";
 import { useNavigate } from "react-router-dom";
+
+const STORAGE_KEY = "pc_recommend_data";
 
 export default function Recommend() {
   const [budget, setBudget] = useState(1500000);
@@ -14,6 +16,65 @@ export default function Recommend() {
   const [loadingMessage, setLoadingMessage] = useState("추천 조합을 찾고 있습니다...");
 
   const navigate = useNavigate();
+
+  // localStorage에서 견적 데이터 복원
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const data = JSON.parse(saved);
+        // 저장된 데이터가 24시간 이내인지 확인
+        const savedTime = data.timestamp || 0;
+        const now = Date.now();
+        const hoursSinceSave = (now - savedTime) / (1000 * 60 * 60);
+        
+        // 24시간 이내 데이터만 복원
+        if (hoursSinceSave < 24) {
+          if (data.budget) setBudget(data.budget);
+          if (data.purpose) setPurpose(data.purpose);
+          if (data.builds && Array.isArray(data.builds) && data.builds.length > 0) {
+            setBuilds(data.builds);
+            // 저장된 선택된 빌드 복원
+            if (data.results) {
+              setResults(data.results);
+            } else if (data.builds.length > 0) {
+              // 선택된 빌드가 없으면 첫 번째 빌드 선택
+              setResults(data.builds[0]);
+            }
+          }
+          if (data.serverMsg) setServerMsg(data.serverMsg);
+          console.log("✅ 저장된 견적 데이터 복원 완료");
+        } else {
+          // 24시간 지난 데이터는 삭제
+          localStorage.removeItem(STORAGE_KEY);
+          console.log("🗑️ 오래된 견적 데이터 삭제");
+        }
+      }
+    } catch (error) {
+      console.error("견적 데이터 복원 실패:", error);
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  }, []);
+
+  // 견적 데이터가 변경될 때마다 localStorage에 저장
+  useEffect(() => {
+    if (builds.length > 0) {
+      try {
+        const dataToSave = {
+          budget,
+          purpose,
+          builds,
+          results,
+          serverMsg,
+          timestamp: Date.now(),
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+        console.log("💾 견적 데이터 저장 완료");
+      } catch (error) {
+        console.error("견적 데이터 저장 실패:", error);
+      }
+    }
+  }, [builds, results, budget, purpose, serverMsg]);
 
   // 백엔드 응답 파싱
   const parseRecommendResponse = (data) => {

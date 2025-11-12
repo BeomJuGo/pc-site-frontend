@@ -20,10 +20,10 @@ export default function PartCard({ part, onClick }) {
   return (
     <div
       onClick={onClick}
-      className="w-full cursor-pointer border border-slate-200 rounded-lg px-3 py-4 hover:bg-slate-50 transition bg-white shadow-sm"
+      className="w-full cursor-pointer border border-slate-200 rounded-lg px-4 py-5 hover:bg-slate-50 transition bg-white shadow-sm"
     >
-      <div className="flex items-center gap-4">
-        <div className="w-16 h-16 flex-shrink-0 rounded bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden">
+      <div className="flex items-center gap-5">
+        <div className="w-20 h-20 flex-shrink-0 rounded bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden">
           {part.image && !part.image.includes('noImg') && !part.image.includes('noData') ? (
             <img 
               src={part.image} 
@@ -41,14 +41,14 @@ export default function PartCard({ part, onClick }) {
           <span className="text-xs text-slate-400 hidden">NO IMAGE</span>
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-[15px] sm:text-[16px] font-medium text-slate-900 truncate">{name}</h3>
+          <h3 className="text-lg font-semibold text-slate-900 break-words leading-snug">{name}</h3>
           {part.review && (
-            <p className="mt-1 text-[12px] sm:text-[13px] text-slate-600 truncate">{part.review}</p>
+            <p className="mt-2 text-sm text-slate-600 break-words leading-relaxed">{part.review}</p>
           )}
         </div>
-        <div className="flex flex-col items-end gap-1">
-          <div className="text-[16px] sm:text-[18px] font-semibold text-slate-900">{priceText}</div>
-          {subScore && <div className="text-[12px] sm:text-[13px] text-slate-500">{subScore}</div>}
+        <div className="flex flex-col items-end gap-2 flex-shrink-0">
+          <div className="text-xl font-bold text-slate-900">{priceText}</div>
+          {subScore && <div className="text-sm text-slate-500 font-medium">{subScore}</div>}
         </div>
       </div>
     </div>

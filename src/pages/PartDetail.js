@@ -103,7 +103,7 @@ export default function PartDetail() {
 
       {part.review && (
         <div className="mt-8">
-          <h3 className="text-lg font-bold text-white mb-3">참고</h3>
+          <h3 className="text-lg font-bold text-white mb-3">AI 한줄평</h3>
           <div className="border border-slate-600 rounded-xl p-5 bg-slate-800/30 backdrop-blur-sm text-base text-slate-200 leading-relaxed font-medium">{part.review}</div>
         </div>
       )}

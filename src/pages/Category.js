@@ -21,6 +21,7 @@ export default function Category() {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("value");
   const [brandFilter, setBrandFilter] = useState("all");
+  const [storageTypeFilter, setStorageTypeFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
@@ -44,7 +45,7 @@ export default function Category() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, sortBy, brandFilter]);
+  }, [search, sortBy, brandFilter, storageTypeFilter]);
 
   // 카테고리별 기본 정렬값 설정
   useEffect(() => {
@@ -53,6 +54,9 @@ export default function Category() {
     } else {
       setSortBy("price");
     }
+    // 카테고리 변경 시 필터 초기화
+    setBrandFilter("all");
+    setStorageTypeFilter("all");
   }, [category]);
 
   const brandOptions =
@@ -61,6 +65,8 @@ export default function Category() {
       : category === "cpu"
         ? ["all", "intel", "amd"]
         : ["all"];
+
+  const storageTypeOptions = category === "storage" ? ["all", "ssd", "hdd"] : [];
 
   const filtered = useMemo(() => {
     const perfScore = (p) => {
@@ -99,7 +105,29 @@ export default function Category() {
             nm.includes("rx ")
           )) ||
           (brandFilter === "nvidia" && (manufacturer === "nvidia" || nm.includes("nvidia") || nm.includes("엔비디아") || nm.includes("지포스") || nm.includes("geforce") || /rtx\s*\d+/.test(nm) || /gtx\s*\d+/.test(nm)));
-        return nameMatch && brandMatch;
+
+        // 저장장치 타입 필터 (SSD/HDD)
+        const storageTypeMatch =
+          category !== "storage" ||
+          storageTypeFilter === "all" ||
+          (storageTypeFilter === "ssd" && (
+            nm.includes("ssd") ||
+            nm.includes("nvme") ||
+            nm.includes("m.2") ||
+            nm.includes("m2") ||
+            nm.includes("sata ssd") ||
+            /ssd/i.test(nm)
+          )) ||
+          (storageTypeFilter === "hdd" && (
+            nm.includes("hdd") ||
+            nm.includes("하드") ||
+            nm.includes("hard disk") ||
+            nm.includes("harddrive") ||
+            /hdd/i.test(nm) ||
+            (!nm.includes("ssd") && !nm.includes("nvme") && !nm.includes("m.2") && !nm.includes("m2"))
+          ));
+
+        return nameMatch && brandMatch && storageTypeMatch;
       })
       .sort((a, b) => {
         const aP = num(a.price);
@@ -123,7 +151,7 @@ export default function Category() {
         }
         return String(a.name).localeCompare(String(b.name));
       });
-  }, [parts, search, brandFilter, sortBy, category]);
+  }, [parts, search, brandFilter, storageTypeFilter, sortBy, category]);
 
   const startIdx = (currentPage - 1) * itemsPerPage;
   const pageItems = filtered.slice(startIdx, startIdx + itemsPerPage);
@@ -203,22 +231,45 @@ export default function Category() {
           )}
         </select>
 
-        <div className="flex gap-1">
-          {brandOptions.map((brand) => (
-            <button
-              key={brand}
-              onClick={() => setBrandFilter(brand)}
-              className={[
-                "px-3 py-2 rounded-lg border text-[13px] backdrop-blur-sm",
-                brandFilter === brand
-                  ? "border-blue-500 bg-blue-500/20 text-white"
-                  : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50",
-              ].join(" ")}
-            >
-              {brand === "all" ? "전체" : brand.toUpperCase()}
-            </button>
-          ))}
-        </div>
+        {/* 브랜드 필터 */}
+        {brandOptions.length > 1 && (
+          <div className="flex gap-1">
+            {brandOptions.map((brand) => (
+              <button
+                key={brand}
+                onClick={() => setBrandFilter(brand)}
+                className={[
+                  "px-3 py-2 rounded-lg border text-[13px] backdrop-blur-sm",
+                  brandFilter === brand
+                    ? "border-blue-500 bg-blue-500/20 text-white"
+                    : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50",
+                ].join(" ")}
+              >
+                {brand === "all" ? "전체" : brand.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* 저장장치 타입 필터 (SSD/HDD) */}
+        {storageTypeOptions.length > 0 && (
+          <div className="flex gap-1">
+            {storageTypeOptions.map((type) => (
+              <button
+                key={type}
+                onClick={() => setStorageTypeFilter(type)}
+                className={[
+                  "px-3 py-2 rounded-lg border text-[13px] backdrop-blur-sm",
+                  storageTypeFilter === type
+                    ? "border-blue-500 bg-blue-500/20 text-white"
+                    : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50",
+                ].join(" ")}
+              >
+                {type === "all" ? "전체" : type === "ssd" ? "SSD" : "HDD"}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="divide-y divide-slate-700 border border-slate-600 rounded-lg bg-slate-800/30 backdrop-blur-sm">

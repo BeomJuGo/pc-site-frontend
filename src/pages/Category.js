@@ -93,36 +93,52 @@ export default function Category() {
       const chipset = String(part.chipset || "").toLowerCase();
       const combined = nm + " " + spec + " " + chipset;
       
-      // Intel 칩셋 패턴
+      // Intel 칩셋 패턴 (더 포괄적으로)
       const intelChipsets = [
-        "z790", "z690", "z590", "z490", "z390", "z370", "z270", "z170",
-        "b760", "b660", "b560", "b460", "b365", "b360", "b250",
-        "h770", "h670", "h610", "h570", "h510", "h470", "h370", "h310",
-        "x299", "x99", "x79", "w680", "w580", "w480"
+        "z790", "z690", "z590", "z490", "z390", "z370", "z270", "z170", "z97", "z87", "z77", "z68",
+        "b760", "b660", "b560", "b460", "b365", "b360", "b250", "b150", "b85", "b75",
+        "h770", "h670", "h610", "h570", "h510", "h470", "h370", "h310", "h170", "h110", "h97", "h87", "h81", "h77",
+        "x299", "x99", "x79", "w680", "w580", "w480", "w790", "w690",
+        "q670", "q670e", "q770", "q870"
       ];
       
-      // AMD 칩셋 패턴
+      // AMD 칩셋 패턴 (더 포괄적으로)
       const amdChipsets = [
-        "x670", "x570", "x470", "x370", "x399", "x299",
-        "b650", "b550", "b450", "b350", "b550m", "b450m",
-        "a620", "a520", "a320", "trx40", "x399"
+        "x670", "x570", "x470", "x370", "x399", "x299", "x370a", "x370 gaming",
+        "b650", "b550", "b450", "b350", "b550m", "b450m", "b550a", "b450m pro",
+        "a620", "a520", "a320", "a320m",
+        "trx40", "x399", "x399e",
+        "970", "990fx", "990x", "980", "890fx", "890gx", "880g"
       ];
       
       // brandFilter에 따라 해당하는 칩셋만 추출
-      if (brandFilter === "all" || brandFilter === "intel") {
+      // "all"일 때는 칩셋 버튼을 표시하지 않으므로 칩셋을 추출하지 않음
+      if (brandFilter === "intel") {
         intelChipsets.forEach((cs) => {
           if (combined.includes(cs)) {
             chipsets.add(cs.toUpperCase());
           }
         });
+        // 정규식으로 추가 패턴 매칭 (z790, b760 등)
+        const intelPattern = /(z\d{3}|b\d{3}|h\d{3}|x\d{3}|w\d{3}|q\d{3})/i;
+        const match = combined.match(intelPattern);
+        if (match) {
+          chipsets.add(match[1].toUpperCase());
+        }
       }
       
-      if (brandFilter === "all" || brandFilter === "amd") {
+      if (brandFilter === "amd") {
         amdChipsets.forEach((cs) => {
           if (combined.includes(cs)) {
             chipsets.add(cs.toUpperCase());
           }
         });
+        // 정규식으로 추가 패턴 매칭 (x670, b650 등)
+        const amdPattern = /(x\d{3}|b\d{3}|a\d{3}|trx\d{2})/i;
+        const match = combined.match(amdPattern);
+        if (match) {
+          chipsets.add(match[1].toUpperCase());
+        }
       }
     });
     
@@ -393,8 +409,8 @@ export default function Category() {
           </div>
         )}
 
-        {/* 칩셋 필터 (메인보드) */}
-        {chipsetOptions.length > 1 && (
+        {/* 칩셋 필터 (메인보드) - Intel 또는 AMD 선택 시에만 표시 */}
+        {category === "motherboard" && brandFilter !== "all" && chipsetOptions.length > 1 && (
           <div className="flex flex-wrap gap-1">
             {chipsetOptions.map((chipset) => (
               <button

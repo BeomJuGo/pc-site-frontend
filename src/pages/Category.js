@@ -132,11 +132,14 @@ export default function Category() {
 
         // DDR 타입 필터 (메모리)
         const spec = String(p.spec || "").toUpperCase();
-        const combined = nm + " " + spec;
+        const nameUpper = String(p.name || "").toUpperCase();
+        const combined = nameUpper + " " + spec;
         const ddrMatch =
           category !== "memory" ||
           ddrFilter === "all" ||
-          combined.includes(ddrFilter);
+          combined.includes(ddrFilter.toUpperCase()) ||
+          nameUpper.includes(ddrFilter.toUpperCase()) ||
+          spec.includes(ddrFilter.toUpperCase());
 
         return nameMatch && brandMatch && storageTypeMatch && ddrMatch;
       })

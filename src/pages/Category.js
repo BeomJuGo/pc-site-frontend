@@ -23,6 +23,7 @@ export default function Category() {
   const [brandFilter, setBrandFilter] = useState("all");
   const [storageTypeFilter, setStorageTypeFilter] = useState("all");
   const [ddrFilter, setDdrFilter] = useState("all");
+  const [chipsetFilter, setChipsetFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
@@ -46,7 +47,14 @@ export default function Category() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, sortBy, brandFilter, storageTypeFilter, ddrFilter]);
+  }, [search, sortBy, brandFilter, storageTypeFilter, ddrFilter, chipsetFilter]);
+
+  // 메인보드에서 브랜드 필터 변경 시 칩셋 필터 초기화
+  useEffect(() => {
+    if (category === "motherboard") {
+      setChipsetFilter("all");
+    }
+  }, [brandFilter, category]);
 
   // 카테고리별 기본 정렬값 설정
   useEffect(() => {
@@ -59,6 +67,7 @@ export default function Category() {
     setBrandFilter("all");
     setStorageTypeFilter("all");
     setDdrFilter("all");
+    setChipsetFilter("all");
   }, [category]);
 
   const brandOptions =
@@ -66,10 +75,59 @@ export default function Category() {
       ? ["all", "nvidia", "amd"]
       : category === "cpu"
         ? ["all", "intel", "amd"]
+        : category === "motherboard"
+        ? ["all", "intel", "amd"]
         : ["all"];
 
   const storageTypeOptions = category === "storage" ? ["all", "ssd", "hdd"] : [];
   const ddrOptions = category === "memory" ? ["all", "DDR5", "DDR4", "DDR3"] : [];
+
+  // 메인보드 칩셋 옵션 동적 생성
+  const chipsetOptions = useMemo(() => {
+    if (category !== "motherboard") return [];
+    
+    const chipsets = new Set();
+    parts.forEach((part) => {
+      const nm = String(part.name || "").toLowerCase();
+      const spec = String(part.spec || "").toLowerCase();
+      const chipset = String(part.chipset || "").toLowerCase();
+      const combined = nm + " " + spec + " " + chipset;
+      
+      // Intel 칩셋 패턴
+      const intelChipsets = [
+        "z790", "z690", "z590", "z490", "z390", "z370", "z270", "z170",
+        "b760", "b660", "b560", "b460", "b365", "b360", "b250",
+        "h770", "h670", "h610", "h570", "h510", "h470", "h370", "h310",
+        "x299", "x99", "x79", "w680", "w580", "w480"
+      ];
+      
+      // AMD 칩셋 패턴
+      const amdChipsets = [
+        "x670", "x570", "x470", "x370", "x399", "x299",
+        "b650", "b550", "b450", "b350", "b550m", "b450m",
+        "a620", "a520", "a320", "trx40", "x399"
+      ];
+      
+      // brandFilter에 따라 해당하는 칩셋만 추출
+      if (brandFilter === "all" || brandFilter === "intel") {
+        intelChipsets.forEach((cs) => {
+          if (combined.includes(cs)) {
+            chipsets.add(cs.toUpperCase());
+          }
+        });
+      }
+      
+      if (brandFilter === "all" || brandFilter === "amd") {
+        amdChipsets.forEach((cs) => {
+          if (combined.includes(cs)) {
+            chipsets.add(cs.toUpperCase());
+          }
+        });
+      }
+    });
+    
+    return ["all", ...Array.from(chipsets).sort()];
+  }, [category, parts, brandFilter]);
 
   const filtered = useMemo(() => {
     const perfScore = (p) => {
@@ -99,12 +157,31 @@ export default function Category() {
         const manufacturer = String(p.manufacturer || "").toLowerCase();
         const brandMatch =
           brandFilter === "all" ||
-          (brandFilter === "intel" && (manufacturer === "intel" || nm.includes("intel") || nm.includes("인텔") || nm.includes("코어"))) ||
+          (brandFilter === "intel" && (
+            manufacturer === "intel" || 
+            nm.includes("intel") || 
+            nm.includes("인텔") || 
+            nm.includes("코어") ||
+            (category === "motherboard" && (
+              nm.includes("z790") || nm.includes("z690") || nm.includes("z590") ||
+              nm.includes("b760") || nm.includes("b660") || nm.includes("b560") ||
+              nm.includes("h770") || nm.includes("h670") || nm.includes("h610") ||
+              /z\d{3}/i.test(nm) || /b\d{3}/i.test(nm) || /h\d{3}/i.test(nm) ||
+              /x299/i.test(nm) || /x99/i.test(nm) || /w\d{3}/i.test(nm)
+            ))
+          )) ||
           (brandFilter === "amd" && (
             manufacturer === "amd" || 
             nm.includes("amd") || 
             (category === "cpu" && (nm.includes("라이젠") || nm.includes("ryzen"))) ||
             (category === "gpu" && (nm.includes("라데온") || nm.includes("radeon") || /rx\s*\d+/.test(nm))) ||
+            (category === "motherboard" && (
+              nm.includes("x670") || nm.includes("x570") || nm.includes("x470") ||
+              nm.includes("b650") || nm.includes("b550") || nm.includes("b450") ||
+              nm.includes("a620") || nm.includes("a520") || nm.includes("a320") ||
+              /x\d{3}/i.test(nm) || /b\d{3}/i.test(nm) || /a\d{3}/i.test(nm) ||
+              /trx40/i.test(nm) || /x399/i.test(nm)
+            )) ||
             nm.includes("rx ")
           )) ||
           (brandFilter === "nvidia" && (manufacturer === "nvidia" || nm.includes("nvidia") || nm.includes("엔비디아") || nm.includes("지포스") || nm.includes("geforce") || /rtx\s*\d+/.test(nm) || /gtx\s*\d+/.test(nm)));
@@ -141,7 +218,18 @@ export default function Category() {
           nameUpper.includes(ddrFilter.toUpperCase()) ||
           spec.includes(ddrFilter.toUpperCase());
 
-        return nameMatch && brandMatch && storageTypeMatch && ddrMatch;
+        // 칩셋 필터 (메인보드)
+        const chipset = String(p.chipset || "").toLowerCase();
+        const chipsetCombined = nm + " " + spec.toLowerCase() + " " + chipset;
+        const chipsetMatch =
+          category !== "motherboard" ||
+          chipsetFilter === "all" ||
+          chipsetCombined.includes(chipsetFilter.toLowerCase()) ||
+          nameUpper.includes(chipsetFilter.toUpperCase()) ||
+          spec.toLowerCase().includes(chipsetFilter.toLowerCase()) ||
+          chipset.includes(chipsetFilter.toLowerCase());
+
+        return nameMatch && brandMatch && storageTypeMatch && ddrMatch && chipsetMatch;
       })
       .sort((a, b) => {
         const aP = num(a.price);
@@ -165,7 +253,7 @@ export default function Category() {
         }
         return String(a.name).localeCompare(String(b.name));
       });
-  }, [parts, search, brandFilter, storageTypeFilter, ddrFilter, sortBy, category]);
+  }, [parts, search, brandFilter, storageTypeFilter, ddrFilter, chipsetFilter, sortBy, category]);
 
   const startIdx = (currentPage - 1) * itemsPerPage;
   const pageItems = filtered.slice(startIdx, startIdx + itemsPerPage);
@@ -300,6 +388,26 @@ export default function Category() {
                 ].join(" ")}
               >
                 {ddr === "all" ? "전체" : ddr}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* 칩셋 필터 (메인보드) */}
+        {chipsetOptions.length > 1 && (
+          <div className="flex flex-wrap gap-1">
+            {chipsetOptions.map((chipset) => (
+              <button
+                key={chipset}
+                onClick={() => setChipsetFilter(chipset)}
+                className={[
+                  "px-3 py-2 rounded-lg border text-[13px] backdrop-blur-sm",
+                  chipsetFilter === chipset
+                    ? "border-blue-500 bg-blue-500/20 text-white"
+                    : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50",
+                ].join(" ")}
+              >
+                {chipset === "all" ? "전체" : chipset}
               </button>
             ))}
           </div>

@@ -22,6 +22,7 @@ export default function Category() {
   const [sortBy, setSortBy] = useState("value");
   const [brandFilter, setBrandFilter] = useState("all");
   const [storageTypeFilter, setStorageTypeFilter] = useState("all");
+  const [ddrFilter, setDdrFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
@@ -45,7 +46,7 @@ export default function Category() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, sortBy, brandFilter, storageTypeFilter]);
+  }, [search, sortBy, brandFilter, storageTypeFilter, ddrFilter]);
 
   // 카테고리별 기본 정렬값 설정
   useEffect(() => {
@@ -57,6 +58,7 @@ export default function Category() {
     // 카테고리 변경 시 필터 초기화
     setBrandFilter("all");
     setStorageTypeFilter("all");
+    setDdrFilter("all");
   }, [category]);
 
   const brandOptions =
@@ -67,6 +69,7 @@ export default function Category() {
         : ["all"];
 
   const storageTypeOptions = category === "storage" ? ["all", "ssd", "hdd"] : [];
+  const ddrOptions = category === "memory" ? ["all", "DDR5", "DDR4", "DDR3"] : [];
 
   const filtered = useMemo(() => {
     const perfScore = (p) => {
@@ -127,7 +130,15 @@ export default function Category() {
             (!nm.includes("ssd") && !nm.includes("nvme") && !nm.includes("m.2") && !nm.includes("m2"))
           ));
 
-        return nameMatch && brandMatch && storageTypeMatch;
+        // DDR 타입 필터 (메모리)
+        const spec = String(p.spec || "").toUpperCase();
+        const combined = nm + " " + spec;
+        const ddrMatch =
+          category !== "memory" ||
+          ddrFilter === "all" ||
+          combined.includes(ddrFilter);
+
+        return nameMatch && brandMatch && storageTypeMatch && ddrMatch;
       })
       .sort((a, b) => {
         const aP = num(a.price);
@@ -151,7 +162,7 @@ export default function Category() {
         }
         return String(a.name).localeCompare(String(b.name));
       });
-  }, [parts, search, brandFilter, storageTypeFilter, sortBy, category]);
+  }, [parts, search, brandFilter, storageTypeFilter, ddrFilter, sortBy, category]);
 
   const startIdx = (currentPage - 1) * itemsPerPage;
   const pageItems = filtered.slice(startIdx, startIdx + itemsPerPage);
@@ -266,6 +277,26 @@ export default function Category() {
                 ].join(" ")}
               >
                 {type === "all" ? "전체" : type === "ssd" ? "SSD" : "HDD"}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* DDR 타입 필터 (메모리) */}
+        {ddrOptions.length > 0 && (
+          <div className="flex gap-1">
+            {ddrOptions.map((ddr) => (
+              <button
+                key={ddr}
+                onClick={() => setDdrFilter(ddr)}
+                className={[
+                  "px-3 py-2 rounded-lg border text-[13px] backdrop-blur-sm",
+                  ddrFilter === ddr
+                    ? "border-blue-500 bg-blue-500/20 text-white"
+                    : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50",
+                ].join(" ")}
+              >
+                {ddr === "all" ? "전체" : ddr}
               </button>
             ))}
           </div>

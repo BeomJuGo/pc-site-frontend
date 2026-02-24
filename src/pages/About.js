@@ -39,10 +39,12 @@ export default function About() {
 
         <Card className="bg-white/90 backdrop-blur-sm border-slate-200/50">
           <CardHeader>
-            <CardTitle className="text-slate-800">데이터 출처</CardTitle>
+            <CardTitle className="text-slate-800">데이터 출처 및 선별 기준</CardTitle>
             <CardDescription className="text-slate-600">
               성능 데이터는 PassMark, 3DMark, Cinebench 등 공개 벤치마크를 참고하며,
               가격 정보는 수집 시점에 따라 변동될 수 있습니다.
+              사이트에서는 해당 데이터를 수집·정리한 뒤 카테고리별 정렬(가성비순·가격순·점수순), 필터(브랜드·타입 등),
+              부품별 상세 요약·가격 추이를 제공하여 비교와 선별에 도움이 되도록 구성했습니다.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -51,10 +53,18 @@ export default function About() {
           <CardHeader>
             <CardTitle className="text-slate-800">문의</CardTitle>
             <CardDescription className="text-slate-600">
-              서비스 관련 문의나 제안 사항이 있으시면 GitHub 저장소 이슈 또는
-              프로젝트 페이지를 통해 연락해 주시면 감사하겠습니다.
+              서비스 관련 문의나 제안 사항이 있으시면 아래 연락처로 연락해 주시면 감사하겠습니다.
             </CardDescription>
           </CardHeader>
+          <CardContent className="pt-0">
+            <p className="text-slate-700 font-medium">
+              이메일:{" "}
+              <a href="mailto:contact@goodpricepc.vercel.app" className="text-blue-600 hover:underline">
+                contact@goodpricepc.vercel.app
+              </a>
+            </p>
+            <p className="text-slate-500 text-sm mt-1">GitHub 저장소 이슈를 통한 문의도 가능합니다.</p>
+          </CardContent>
         </Card>
 
         <div className="flex flex-wrap gap-4 justify-center pt-4">
@@ -69,6 +79,12 @@ export default function About() {
             className="inline-flex items-center px-5 py-2.5 rounded-lg bg-white/20 text-white hover:bg-white/30 font-medium transition-colors"
           >
             개인정보처리방침
+          </Link>
+          <Link
+            to="/terms"
+            className="inline-flex items-center px-5 py-2.5 rounded-lg bg-white/20 text-white hover:bg-white/30 font-medium transition-colors"
+          >
+            이용약관
           </Link>
         </div>
       </div>

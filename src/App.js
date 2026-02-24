@@ -7,6 +7,8 @@ import PartDetail from "./pages/PartDetail";
 import Recommend from "./pages/Recommend";
 import Privacy from "./pages/Privacy";
 import About from "./pages/About";
+import Guide from "./pages/Guide";
+import Terms from "./pages/Terms";
 
 export default function App() {
   return (
@@ -30,7 +32,9 @@ export default function App() {
             <Route path="/motherboard" element={<Navigate to="/category/motherboard" replace />} />
             <Route path="/ram" element={<Navigate to="/category/memory" replace />} />
             <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
             <Route path="/about" element={<About />} />
+            <Route path="/guide" element={<Guide />} />
           </Routes>
         </main>
         <Footer />

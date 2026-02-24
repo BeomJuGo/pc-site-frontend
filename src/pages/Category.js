@@ -11,6 +11,17 @@ const num = (v) => {
   return Number.isFinite(n) ? n : 0;
 };
 
+const CATEGORY_INTRO = {
+  cpu: "CPU는 PC의 연산을 담당하는 핵심 부품입니다. 게임은 6~8코어, 영상·렌더링은 코어·스레드 수가 많을수록 유리합니다. 아래 목록에서는 가성비순·가격순·PassMark 점수순으로 정렬해 비교할 수 있으며, 제품을 클릭하면 상세 스펙과 가격 추이를 확인할 수 있습니다.",
+  gpu: "그래픽카드(GPU)는 게임 화질과 프레임, 영상 편집·3D 작업 성능에 직결됩니다. 1080p는 6GB VRAM 이상, 1440p는 8GB 이상을 권장합니다. 3DMark 점수순·가성비순 정렬로 성능과 가격을 함께 비교해 보세요.",
+  memory: "메모리(RAM)는 멀티태스킹과 작업 용량을 좌우합니다. DDR4·DDR5 타입과 메인보드 호환성을 반드시 확인하고, 용도에 맞는 용량(16GB·32GB 등)과 속도를 선택하세요. 가격순·이름순으로 비교할 수 있습니다.",
+  motherboard: "메인보드는 CPU 소켓·메모리 타입·확장 슬롯을 결정합니다. 선택한 CPU와 호환되는 소켓(AM5, LGA1700 등)과 원하는 폼팩터(ATX, M-ATX)에 맞는 제품을 필터로 골라 비교해 보세요.",
+  storage: "저장장치는 SSD(NVMe·SATA)와 HDD로 나뉩니다. OS·자주 쓰는 프로그램은 SSD, 대용량 보관은 HDD 조합을 추천합니다. 타입(SSD/HDD)·가격순으로 정렬해 비교할 수 있습니다.",
+  case: "PC 케이스는 메인보드 폼팩터(ATX, M-ATX, ITX), GPU 길이, 쿨러 높이, 쿨링 성능을 고려해 선택합니다. 아래 목록에서 크기와 확장성을 비교해 보세요.",
+  cooler: "CPU 케이스 내부 온도 관리에 중요합니다. TDP(발열량)에 맞는 쿨러를 선택하고, 케이스 높이 제한과 소음 수준을 확인하세요. 가격순·이름순으로 비교할 수 있습니다.",
+  psu: "파워서플라이(PSU)는 전체 부품 전력 합계보다 여유 있는 용량(80 Plus 인증 등)을 선택하는 것이 안정적입니다. 아래 목록에서 출력·효율·가격을 비교해 보세요.",
+};
+
 export default function Category() {
   const { category } = useParams();
   const navigate = useNavigate();
@@ -277,12 +288,19 @@ export default function Category() {
 
   if (loading) return <div className="p-8 text-center text-slate-300">로딩 중...</div>;
 
+  const intro = CATEGORY_INTRO[category];
+
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-bold text-white">{category.toUpperCase()}</h2>
         <div className="text-sm text-slate-300">총 {filtered.length.toLocaleString()}개</div>
       </div>
+      {intro && (
+        <div className="mb-6 p-4 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-slate-200 text-sm leading-relaxed">
+          {intro}
+        </div>
+      )}
 
       {/* 에러 메시지 표시 */}
       {error && (

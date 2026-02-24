@@ -103,13 +103,20 @@ export default function Header() {
               ))}
             </div>
 
-            {/* AI Recommend Section */}
-            <div className={`border-t border-slate-200 pt-4 ${isMenuOpen ? 'animate-fade-in-up' : 'opacity-0 translate-y-4'
+            {/* Guide & AI Recommend Section */}
+            <div className={`border-t border-slate-200 pt-4 flex flex-wrap gap-3 ${isMenuOpen ? 'animate-fade-in-up' : 'opacity-0 translate-y-4'
               }`}
               style={{
                 animationDelay: `${menuItems.length * 100}ms`,
                 animationFillMode: 'forwards'
               }}>
+              <NavLink
+                to="/guide"
+                className="inline-flex items-center px-5 py-2.5 text-sm font-medium rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                📖 가이드
+              </NavLink>
               <NavLink
                 to="/ai-recommend"
                 className="inline-flex items-center px-6 py-3 text-sm font-medium rounded-lg bg-gradient-to-r from-pink-500 to-rose-500 text-white hover:from-pink-600 hover:to-rose-600 transition-all duration-500 shadow-lg hover:shadow-xl relative overflow-hidden group"

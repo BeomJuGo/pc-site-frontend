@@ -22,9 +22,18 @@ export default function Footer() {
           <Link to="/about" className="text-slate-600 hover:text-slate-900 font-medium transition-colors">
             사이트 소개
           </Link>
+          <Link to="/guide" className="text-slate-600 hover:text-slate-900 font-medium transition-colors">
+            가이드
+          </Link>
           <Link to="/privacy" className="text-slate-600 hover:text-slate-900 font-medium transition-colors">
             개인정보처리방침
           </Link>
+          <Link to="/terms" className="text-slate-600 hover:text-slate-900 font-medium transition-colors">
+            이용약관
+          </Link>
+          <a href="mailto:contact@goodpricepc.vercel.app" className="text-slate-600 hover:text-slate-900 font-medium transition-colors">
+            문의
+          </a>
         </div>
       </div>
     </footer>

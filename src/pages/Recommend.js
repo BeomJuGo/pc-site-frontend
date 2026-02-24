@@ -268,6 +268,10 @@ export default function Recommend() {
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-6 max-w-6xl mx-auto">
       <h1 className="text-3xl font-bold text-slate-900 mb-6">🤖 AI 견적 추천</h1>
+      <p className="text-slate-600 mb-6 leading-relaxed">
+        예산과 용도(게임용·작업용·사무용·가성비)를 입력하면, 호환되는 CPU·GPU·메인보드·메모리 등 부품 조합을 AI가 추천합니다.
+        추천 결과에는 총 견적, 호환성 검증, AI 전문가 평가, 부품 구성이 포함되며, 각 부품을 클릭하면 상세 페이지로 이동해 가격 추이와 스펙을 확인할 수 있습니다.
+      </p>
 
       {/* 입력 영역 */}
       <div className="bg-white rounded-xl border border-slate-200 p-6 mb-6 shadow-sm">
